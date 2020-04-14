@@ -1,7 +1,19 @@
 const fetch = require('node-fetch');
+const from = require('highland');
 
+/**
+ * Starts a clone in a given domain.
+ */
 exports.start = (cloneId, domain) => send('start', { cloneId, domain });
+/**
+ * Stops the given clone normally and then deletes any persisted data,
+ * such that a re-start of the same clone ID will be as if brand-new.
+ */
 exports.destroy = cloneId => send('destroy', { cloneId });
+/**
+ * Sends the given transaction request to the given clone.
+ */
+exports.transact = (cloneId, pattern) => send('transact', { cloneId }, pattern);
 
 async function send(message, params, body) {
   const url = new URL(message, process.env.MELD_ORCHESTRATOR_URL);
@@ -11,7 +23,14 @@ async function send(message, params, body) {
     options.body = JSON.stringify(body);
     options.headers = { 'Content-Type': 'application/json' };
   }
-  return checkStatus(await fetch(url.toString(), options)).json();
+  const res = checkStatus(await fetch(url.toString(), options));
+  if (res.headers.get('transfer-encoding') === 'chunked') {
+    return from(res.body)
+      .map(chunk => JSON.parse(chunk.toString()))
+      .collect().toPromise(Promise); // TODO: option to output the stream
+  } else {
+    return res.json();
+  }
 };
 
 function checkStatus(res) {

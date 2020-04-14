@@ -26,6 +26,7 @@
     "testTimeout": 10000
   },
   "dependencies": {
+    "highland": "^2.13.5",
     "jest": "^25.3.0",
     "node-fetch": "^2.6.0"
   }
