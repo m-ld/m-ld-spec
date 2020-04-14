@@ -1,27 +1,47 @@
 const fetch = require('node-fetch');
 const from = require('highland');
 
-/**
- * Starts a clone in a given domain.
- */
-exports.start = (cloneId, domain) => send('start', { cloneId, domain });
-/**
- * Stops the given clone normally, keeping any persisted data for that ID.
- */
-exports.stop = cloneId => send('stop', { cloneId });
-/**
- * Kills the clone process completely without any normal shutdown.
- */
-exports.kill = cloneId => send('kill', { cloneId });
-/**
- * Stops the given clone normally and then deletes any persisted data,
- * such that a re-start of the same clone ID will be as if brand-new.
- */
-exports.destroy = cloneId => send('destroy', { cloneId });
-/**
- * Sends the given transaction request to the given clone.
- */
-exports.transact = (cloneId, pattern) => send('transact', { cloneId }, pattern);
+module.exports = class Clone {
+  constructor(id) {
+    this.id = id;
+  }
+
+  /**
+   * Starts a clone in a given domain.
+   */
+  start(domain) {
+    return send('start', { cloneId: this.id, domain });
+  }
+
+  /**
+   * Stops the given clone normally, keeping any persisted data for that ID.
+   */
+  stop() {
+    return send('stop', { cloneId: this.id });
+  };
+
+  /**
+   * Kills the clone process completely without any normal shutdown.
+   */
+  kill() {
+    return send('kill', { cloneId: this.id });
+  };
+
+  /**
+   * Stops the given clone normally and then deletes any persisted data,
+   * such that a re-start of the same clone ID will be as if brand-new.
+   */
+  destroy() {
+    return send('destroy', { cloneId: this.id });
+  };
+
+  /**
+   * Sends the given transaction request to the given clone.
+   */
+  transact(pattern) {
+    return send('transact', { cloneId: this.id }, pattern);
+  };
+}
 
 async function send(message, params, body) {
   const url = new URL(message, process.env.MELD_ORCHESTRATOR_URL);
