@@ -6,6 +6,14 @@ const from = require('highland');
  */
 exports.start = (cloneId, domain) => send('start', { cloneId, domain });
 /**
+ * Stops the given clone normally, keeping any persisted data for that ID.
+ */
+exports.stop = cloneId => send('stop', { cloneId });
+/**
+ * Kills the clone process completely without any normal shutdown.
+ */
+exports.kill = cloneId => send('kill', { cloneId });
+/**
  * Stops the given clone normally and then deletes any persisted data,
  * such that a re-start of the same clone ID will be as if brand-new.
  */
