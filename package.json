@@ -1,0 +1,32 @@
+{
+  "name": "@gsvarovsky/m-ld-spec",
+  "version": "0.1.0",
+  "description": "m-ld Protocol Specification",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gsvarovsky/m-ld-spec.git"
+  },
+  "keywords": [
+    "m-ld"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gsvarovsky/m-ld-spec/issues"
+  },
+  "homepage": "https://github.com/gsvarovsky/m-ld-spec#readme",
+  "jest": {
+    "rootDir": "compliance",
+    "testTimeout": 10000
+  },
+  "dependencies": {
+    "jest": "^25.3.0",
+    "node-fetch": "^2.6.0"
+  }
+}
