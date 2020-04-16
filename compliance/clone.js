@@ -16,37 +16,48 @@ module.exports = class Clone {
 
   /**
    * Starts a clone. The domain is inferred from the running test name.
+   * http://orchestrator:port/start?cloneId=hexclonid&domain=full-test-name.m-ld.org
+   * => { '@type': 'started' }
    */
-  start() {
+  async start() {
     return send('start', { cloneId: this.id, domain });
   }
 
   /**
    * Stops the given clone normally, keeping any persisted data for that ID.
+   * http://orchestrator:port/stop?cloneId=hexclonid
+   * => { '@type': 'stopped' }
    */
-  stop() {
+  async stop() {
     return send('stop', { cloneId: this.id });
   };
 
   /**
    * Kills the clone process completely without any normal shutdown.
+   * http://orchestrator:port/kill?cloneId=hexclonid
+   * => { '@type': 'killed' }
    */
-  kill() {
+  async kill() {
     return send('kill', { cloneId: this.id });
   };
 
   /**
    * Stops the given clone normally and then deletes any persisted data,
    * such that a re-start of the same clone ID will be as if brand-new.
+   * http://orchestrator:port/destroy?cloneId=hexclonid
+   * => { '@type': 'destroyed' }
    */
-  destroy() {
+  async destroy() {
     return send('destroy', { cloneId: this.id });
   };
 
   /**
    * Sends the given transaction request to the given clone.
+   * http://orchestrator:port/transact?cloneId=hexclonid
+   * <= json-rql
+   * => Array<Subject>
    */
-  transact(pattern) {
+  async transact(pattern) {
     return send('transact', { cloneId: this.id }, pattern);
   };
 }
@@ -63,7 +74,7 @@ async function send(message, params, body) {
   if (res.headers.get('transfer-encoding') === 'chunked') {
     return from(res.body)
       .map(chunk => JSON.parse(chunk.toString()))
-      .collect().toPromise(Promise); // TODO: option to output the stream
+      .collect().toPromise(Promise); // TODO: option to return the stream
   } else {
     return res.json();
   }

@@ -1,5 +1,8 @@
 const Clone = require('./clone');
 
+/**
+ * Basic tests for start and transact on a genesis clone
+ */
 describe('Genesis clone', () => {
   let clone;
 
