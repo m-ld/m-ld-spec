@@ -1,15 +1,23 @@
 const fetch = require('node-fetch');
 const from = require('highland');
 
+let domain;
+jasmine.getEnv().addReporter({
+  specStarted: (result) =>
+    domain = encodeURIComponent(result.fullName.toLowerCase().replace(/\s+/g, '-')) + '.m-ld.org'
+});
+
+let nextCloneId = Math.floor(Math.random() * 0xFFFFFFFF);
+
 module.exports = class Clone {
-  constructor(id) {
-    this.id = id;
+  constructor() {
+    this.id = (nextCloneId++).toString(16);
   }
 
   /**
-   * Starts a clone in a given domain.
+   * Starts a clone. The domain is inferred from the running test name.
    */
-  start(domain) {
+  start() {
     return send('start', { cloneId: this.id, domain });
   }
 
