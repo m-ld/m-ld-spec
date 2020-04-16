@@ -11,9 +11,24 @@ describe('Colony', () => {
     clone2 = new Clone();
   });
 
-  test('Two clones start on same domain', async () => {
+  test('Two clones start', async () => {
     await clone1.start();
-    await expect(clone2.start()).resolves.toBeDefined();
+    return expect(clone2.start()).resolves.toBeDefined();
+  });
+
+  test('Clone can restart', async () => {
+    await clone1.start();
+    await clone2.start();
+    await clone1.stop();
+    return expect(clone1.start()).resolves.toBeDefined();
+  });
+
+  test('Clone cannot restart alone', async () => {
+    await clone1.start();
+    await clone2.start();
+    await clone1.stop();
+    await clone2.stop();
+    return expect(clone1.start()).rejects.toThrow();
   });
 
   afterEach(async () => await Promise.all([clone1.destroy(), clone2.destroy()]));

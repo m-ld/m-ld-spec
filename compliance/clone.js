@@ -44,6 +44,8 @@ module.exports = class Clone {
   /**
    * Stops the given clone normally and then deletes any persisted data,
    * such that a re-start of the same clone ID will be as if brand-new.
+   * Note that this should not error if the clone is already dead, but
+   * still destroy its data.
    * http://orchestrator:port/destroy?cloneId=hexclonid
    * => { '@type': 'destroyed' }
    */
