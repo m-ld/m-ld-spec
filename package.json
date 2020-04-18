@@ -6,7 +6,7 @@
     "test": "test"
   },
   "scripts": {
-    "publish-patch": "npm run build && npm version patch -m \"Patch version\" && git push && npm publish",
+    "publish-patch": "npm version patch -m \"Patch version\" && git push && npm publish",
     "test": "jasmine --config=compliance/jasmine.json"
   },
   "repository": {
