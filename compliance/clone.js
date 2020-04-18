@@ -23,12 +23,12 @@ module.exports = class Clone extends EventEmitter {
    * The 'start' end-point sets up an HTTP Stream. The first chunk is the 'started' message;
    * all subsequent chunks are 'updated' messages, which are emitted by this class as events.
    * http://orchestrator:port/start?cloneId=hexclonid&domain=full-test-name.m-ld.org
-   * => { '@type': 'started' }, { '@type: 'updated' }...
+   * => { '@type': 'started' }, { '@type: 'updated', body: DeleteInsert }...
    */
   async start() {
     const events = await send('start', { cloneId: this.id, domain });
     return new Promise(resolve => events.each(event =>
-      event['@type'] === 'started' ? resolve(event) : this.emit(event['@type'], event)));
+      event['@type'] === 'started' ? resolve(event) : this.emit(event['@type'], event.body)));
   }
 
   /**
