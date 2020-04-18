@@ -11,13 +11,13 @@ describe('Colony', () => {
     clone2 = new Clone();
   });
 
-  it('Two clones start', async () => {
+  it('clones start', async () => {
     await clone1.start();
     const started = await clone2.start();
     expect(started).toBeDefined();
   });
 
-  it('Clone can restart', async () => {
+  it('clone can restart', async () => {
     await clone1.start();
     await clone2.start();
     await clone1.stop();
@@ -26,7 +26,7 @@ describe('Colony', () => {
   });
 
   // This is obviously a usage problem, see m-ld#11
-  it('Clone cannot restart alone', async () => {
+  it('clone cannot restart alone', async () => {
     await clone1.start();
     await clone2.start();
     await clone1.stop();
@@ -34,8 +34,7 @@ describe('Colony', () => {
     try {
       await clone1.start();
       fail();
-    } catch (err) {
-    }
+    } catch (err) { }
   });
 
   afterEach(async () => await Promise.all([clone1.destroy(), clone2.destroy()]));

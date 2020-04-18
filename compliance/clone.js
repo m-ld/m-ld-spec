@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+const EventEmitter = require('events');
 const from = require('highland');
 
 let domain;
@@ -8,20 +9,26 @@ jasmine.getEnv().addReporter({
 });
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
-let nextCloneId = Math.floor(Math.random() * 0xFFFFFFFF);
-
-module.exports = class Clone {
+/**
+ * A clone object wraps the orchestrator API for a single clone.
+ */
+module.exports = class Clone extends EventEmitter {
   constructor() {
-    this.id = (nextCloneId++).toString(16);
+    super();
+    this.id = Math.floor(Math.random() * 0xFFFFFFFF).toString(16);
   }
 
   /**
    * Starts a clone. The domain is inferred from the running test name.
+   * The 'start' end-point sets up an HTTP Stream. The first chunk is the 'started' message;
+   * all subsequent chunks are 'updated' messages, which are emitted by this class as events.
    * http://orchestrator:port/start?cloneId=hexclonid&domain=full-test-name.m-ld.org
-   * => { '@type': 'started' }
+   * => { '@type': 'started' }, { '@type: 'updated' }...
    */
   async start() {
-    return send('start', { cloneId: this.id, domain });
+    const events = await send('start', { cloneId: this.id, domain });
+    return new Promise(resolve => events.each(event =>
+      event['@type'] === 'started' ? resolve(event) : this.emit(event['@type'], event)));
   }
 
   /**
@@ -58,10 +65,11 @@ module.exports = class Clone {
    * Sends the given transaction request to the given clone.
    * http://orchestrator:port/transact?cloneId=hexclonid
    * <= json-rql
-   * => Array<Subject>
+   * => Subject ...
    */
   async transact(pattern) {
-    return send('transact', { cloneId: this.id }, pattern);
+    const subjects = await send('transact', { cloneId: this.id }, pattern);
+    return subjects.collect().toPromise(Promise); // TODO: option to return the stream
   };
 }
 
@@ -75,9 +83,7 @@ async function send(message, params, body) {
   }
   const res = checkStatus(await fetch(url.toString(), options));
   if (res.headers.get('transfer-encoding') === 'chunked') {
-    return from(res.body)
-      .map(chunk => JSON.parse(chunk.toString()))
-      .collect().toPromise(Promise); // TODO: option to return the stream
+    return from(res.body).map(chunk => JSON.parse(chunk.toString()));
   } else {
     return res.json();
   }

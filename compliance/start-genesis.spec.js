@@ -15,12 +15,15 @@ describe('Genesis clone', () => {
 
   it('accepts a subject', async () => {
     await clone.start();
-    await clone.transact({ '@id': 'fred', name: 'Fred' });
+    const transaction = clone.transact({ '@id': 'fred', name: 'Fred' });
+    const updated = new Promise(resolve => clone.on('updated', resolve));
+    await transaction;
+    await updated;
     const subjects = await clone.transact({ '@describe': 'fred' });
     expect(subjects).toEqual([{ '@id': 'fred', name: 'Fred' }]);
   });
 
-  it('data survives restart', async () => {
+  it('survives restart', async () => {
     await clone.start();
     await clone.transact({ '@id': 'fred', name: 'Fred' });
     await clone.stop();
