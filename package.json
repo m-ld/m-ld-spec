@@ -6,7 +6,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "jest"
+    "publish-patch": "npm run build && npm version patch -m \"Patch version\" && git push && npm publish",
+    "test": "jasmine --config=compliance/jasmine.json"
   },
   "repository": {
     "type": "git",
@@ -21,13 +22,9 @@
     "url": "https://github.com/gsvarovsky/m-ld-spec/issues"
   },
   "homepage": "https://github.com/gsvarovsky/m-ld-spec#readme",
-  "jest": {
-    "rootDir": "compliance",
-    "testTimeout": 10000
-  },
   "dependencies": {
     "highland": "^2.13.5",
-    "jest": "^25.3.0",
+    "jasmine": "^3.5.0",
     "node-fetch": "^2.6.0"
   }
 }

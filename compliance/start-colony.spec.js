@@ -11,24 +11,31 @@ describe('Colony', () => {
     clone2 = new Clone();
   });
 
-  test('Two clones start', async () => {
+  it('Two clones start', async () => {
     await clone1.start();
-    return expect(clone2.start()).resolves.toBeDefined();
+    const started = await clone2.start();
+    expect(started).toBeDefined();
   });
 
-  test('Clone can restart', async () => {
+  it('Clone can restart', async () => {
     await clone1.start();
     await clone2.start();
     await clone1.stop();
-    return expect(clone1.start()).resolves.toBeDefined();
+    const started = await clone1.start();
+    return expect(started).toBeDefined();
   });
 
-  test('Clone cannot restart alone', async () => {
+  // This is obviously a usage problem, see m-ld#11
+  it('Clone cannot restart alone', async () => {
     await clone1.start();
     await clone2.start();
     await clone1.stop();
     await clone2.stop();
-    return expect(clone1.start()).rejects.toThrow();
+    try {
+      await clone1.start();
+      fail();
+    } catch (err) {
+    }
   });
 
   afterEach(async () => await Promise.all([clone1.destroy(), clone2.destroy()]));

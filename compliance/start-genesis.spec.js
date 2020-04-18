@@ -8,18 +8,19 @@ describe('Genesis clone', () => {
 
   beforeEach(() => clone = new Clone());
 
-  test('starts', async () => {
-    await expect(clone.start()).resolves.toBeDefined();
+  it('starts', async () => {
+    const started = await clone.start();
+    expect(started).toBeDefined();
   });
 
-  test('accepts a subject', async () => {
+  it('accepts a subject', async () => {
     await clone.start();
     await clone.transact({ '@id': 'fred', name: 'Fred' });
     const subjects = await clone.transact({ '@describe': 'fred' });
     expect(subjects).toEqual([{ '@id': 'fred', name: 'Fred' }]);
   });
 
-  test('data survives restart', async () => {
+  it('data survives restart', async () => {
     await clone.start();
     await clone.transact({ '@id': 'fred', name: 'Fred' });
     await clone.stop();

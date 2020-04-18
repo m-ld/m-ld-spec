@@ -6,6 +6,7 @@ jasmine.getEnv().addReporter({
   specStarted: (result) =>
     domain = encodeURIComponent(result.fullName.toLowerCase().replace(/\s+/g, '-')) + '.m-ld.org'
 });
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
 let nextCloneId = Math.floor(Math.random() * 0xFFFFFFFF);
 
