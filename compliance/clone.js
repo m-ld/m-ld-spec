@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 const EventEmitter = require('events');
-const from = require('highland');
+const { Transform } = require('stream');
 
 let domain;
 jasmine.getEnv().addReporter({
@@ -27,8 +27,12 @@ module.exports = class Clone extends EventEmitter {
    */
   async start() {
     const events = await send('start', { cloneId: this.id, domain });
-    return new Promise(resolve => events.each(event =>
-      event['@type'] === 'started' ? resolve(event) : this.emit(event['@type'], event.body)));
+    return new Promise((resolve, reject) => {
+      events.on('data', event => event['@type'] === 'started' ?
+        resolve(event) : this.emit(event['@type'], event.body));
+      events.on('end', () => this.emit('closed'));
+      events.on('error', reject);
+    });
   }
 
   /**
@@ -69,8 +73,25 @@ module.exports = class Clone extends EventEmitter {
    */
   async transact(pattern) {
     const subjects = await send('transact', { cloneId: this.id }, pattern);
-    return subjects.collect().toPromise(Promise); // TODO: option to return the stream
+    // TODO: option to just return the stream
+    return new Promise((resolve, reject) => {
+      const all = [];
+      subjects.on('data', subject => all.push(subject));
+      subjects.on('end', () => resolve(all));
+      subjects.on('error', reject);
+    });
   };
+
+  /**
+   * Utility returning a promise that resolves when an update is emitted with the given path.
+   * The path matching requires the last path element to be a deep value which has the prior
+   * path elements appearing, in order, in its deep path.
+   * @param  {...any} path any sparse path that the update must contain
+   */
+  async updated(...path) {
+    return new Promise(resolve => this.on('updated',
+      update => hasPath(update, path) && resolve(update)));
+  }
 }
 
 async function send(message, params, body) {
@@ -83,7 +104,16 @@ async function send(message, params, body) {
   }
   const res = checkStatus(await fetch(url.toString(), options));
   if (res.headers.get('transfer-encoding') === 'chunked') {
-    return from(res.body).map(chunk => JSON.parse(chunk.toString()));
+    return res.body.pipe(new Transform({
+      objectMode: true,
+      transform(chunk, _, callback) {
+        try {
+          callback(null, JSON.parse(chunk.toString()));
+        } catch (err) {
+          callback(err);
+        }
+      }
+    }));
   } else {
     return res.json();
   }
@@ -94,4 +124,16 @@ function checkStatus(res) {
     return res;
   else
     throw new Error(res.statusText);
+}
+
+function hasPath(obj, path) {
+  if (path == null || !path.length || (path.length === 1 && obj === path[0])) {
+    return true;
+  } else if (typeof obj === 'object') {
+    if (path.length > 1 && path[0] in obj)
+      return hasPath(obj[path[0]], path.slice(1));
+    else
+      return Object.values(obj).some(val => hasPath(val, path));
+  }
+  return false;
 }

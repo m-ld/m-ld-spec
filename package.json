@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/gsvarovsky/m-ld-spec#readme",
   "dependencies": {
-    "highland": "^2.13.5",
     "jasmine": "^3.5.0",
     "node-fetch": "^2.6.0"
   }

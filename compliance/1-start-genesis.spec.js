@@ -15,12 +15,18 @@ describe('Genesis clone', () => {
 
   it('accepts a subject', async () => {
     await clone.start();
-    const transaction = clone.transact({ '@id': 'fred', name: 'Fred' });
-    const updated = new Promise(resolve => clone.on('updated', resolve));
-    await transaction;
-    await updated;
+    const insert = clone.transact({ '@id': 'fred', name: 'Fred' });
+    const updated = clone.updated();
+    
+    await insert;
+    const update = await updated;
+    
     const subjects = await clone.transact({ '@describe': 'fred' });
     expect(subjects).toEqual([{ '@id': 'fred', name: 'Fred' }]);
+    expect(update).toEqual({
+      '@delete': { '@graph': [] },
+      '@insert': { '@graph': [{ '@id': 'fred', name: 'Fred' }] }
+    });
   });
 
   it('survives restart', async () => {
@@ -31,6 +37,8 @@ describe('Genesis clone', () => {
     const subjects = await clone.transact({ '@describe': 'fred' });
     expect(subjects).toEqual([{ '@id': 'fred', name: 'Fred' }]);
   });
+
+  it('prevents multiple geneses');
 
   afterEach(async () => await clone.destroy());
 });
