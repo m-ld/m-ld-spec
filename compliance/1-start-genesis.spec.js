@@ -38,7 +38,7 @@ describe('Genesis clone', () => {
     expect(subjects).toEqual([{ '@id': 'fred', name: 'Fred' }]);
   });
 
-  it('prevents multiple geneses');
+  it('prevents multiple geneses', () => pending('not yet implemented'));
 
   afterEach(async () => await clone.destroy());
 });
