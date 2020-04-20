@@ -3,7 +3,7 @@ const Clone = require('./clone');
 /**
  * Basic multi-clone transaction tests (no chaos)
  */
-describe('Conflict colony', () => {
+describe('On conflict', () => {
   let clone1 = new Clone, clone2 = new Clone
 
   beforeEach(async () => {

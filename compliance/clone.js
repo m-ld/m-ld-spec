@@ -83,6 +83,15 @@ module.exports = class Clone extends EventEmitter {
   };
 
   /**
+   * Isolates the clone from the messaging layer.
+   * http://orchestrator:port/kill?cloneId=hexclonid
+   * => { '@type': 'partitioned' }
+   */
+  async partition() {
+    return send('partition', { cloneId: this.id });
+  };
+
+  /**
    * Utility returning a promise that resolves when an update is emitted with the given path.
    * The path matching requires the last path element to be a deep value which has the prior
    * path elements appearing, in order, in its deep path.
@@ -91,6 +100,14 @@ module.exports = class Clone extends EventEmitter {
   async updated(...path) {
     return new Promise(resolve => this.on('updated',
       update => hasPath(update, path) && resolve(update)));
+  }
+
+  /**
+   * Utility returning a promise when the clone closes. This may be independent of
+   * any active stop(), kill() or destroy().
+   */
+  async closed() {
+    return new Promise(resolve => this.on('closed', resolve));
   }
 }
 
