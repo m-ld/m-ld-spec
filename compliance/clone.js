@@ -146,6 +146,8 @@ function checkStatus(res) {
 function hasPath(obj, path) {
   if (path == null || !path.length || (path.length === 1 && obj === path[0])) {
     return true;
+  } else if (typeof path[0] === 'object') {
+    return Object.entries(path[0]).every(e => hasPath(obj, e.concat(path.slice(1))));
   } else if (typeof obj === 'object') {
     if (path.length > 1 && path[0] in obj)
       return hasPath(obj[path[0]], path.slice(1));

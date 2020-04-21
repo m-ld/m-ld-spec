@@ -4,13 +4,12 @@ const Clone = require('./clone');
  * Basic multi-clone transaction tests (no chaos)
  */
 describe('Active colony', () => {
-  let clones = new Array(3);
+  let clones;
 
   beforeEach(async () => {
-    for (let i = 0; i < clones.length; i++) {
-      clones[i] = new Clone();
-      await clones[i].start();
-    }
+    clones = Array.from(new Array(3), () => new Clone);
+    await clones[0].start(); // Genesis
+    await Promise.all(clones.slice(1).map(clone => clone.start()));
   });
 
   async function basicConvergenceTest(originator) {
