@@ -1,4 +1,4 @@
 {
   "spec_dir": "compliance",
-  "spec_files": ["*.spec.js"]
+  "spec_files": ["A-*.spec.js"]
 }
