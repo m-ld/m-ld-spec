@@ -20,16 +20,16 @@ describe('Restart colony', () => {
 
   it('restarting clone revs-up', async () => {
     await clone.start();
-    const updated = clone.updated();
+    let updated = clone.updated();
     await genesis.transact({ '@id': 'fred', name: 'Fred' });
     await updated;
 
     await clone.stop();
     await genesis.transact({ '@id': 'wilma', name: 'Wilma' });
+    updated = clone.updated('@insert', 'wilma');
     await clone.start();
 
-    const subjects = await clone.transact({ '@describe': 'fred' });
-    expect(subjects).toEqual([{ '@id': 'fred', name: 'Fred' }]);
+    expectAsync(updated).toBeResolved();
   });
 
   afterEach(async () => {

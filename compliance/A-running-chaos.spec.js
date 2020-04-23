@@ -11,7 +11,7 @@ describe('Running chaos', () => {
     chaos = new ChaosTest(NUM_CLONES, NUM_ROUNDS);
     await chaos.setup();
     // Make a round mostly longer than a transaction but sometimes shorter
-    chaos.maxRoundDurationMillis = chaos.timings.transact * 3;
+    chaos.meanRoundDurationMillis = chaos.timings.transact * 1.5;
   });
 
   it('converges entities', () => chaos.test(async () => {

@@ -4,11 +4,12 @@ function compareById(e1, e2) {
   return e1['@id'] < e2['@id'] ? -1 : e1['@id'] > e2['@id'] ? 1 : 0;
 };
 /**
- * Uses central limit theorem to generate an approximation to a gaussian distributed random [0, 1)
+ * Uses central limit theorem to generate an approximation to a
+ * gaussian distributed random [0, 2) with mean 1
  * https://en.wikipedia.org/wiki/Central_limit_theorem
  */
 function gaussRandom() {
-  return Array.from(new Array(6), Math.random).reduce((sum, n) => sum + n) / 6;
+  return Array.from(new Array(6), Math.random).reduce((sum, n) => sum + n) / 3;
 };
 
 /**
@@ -23,7 +24,7 @@ exports.ChaosTest = class {
     this.clones = Array.from(new Array(numClones), () => new Clone);
     this.timings = { startClone: 0, transact: 0 };
     this.numRounds = numRounds;
-    this.maxRoundDurationMillis = 100;
+    this.meanRoundDurationMillis = 100;
   }
 
   async setup() {
@@ -37,7 +38,7 @@ exports.ChaosTest = class {
     // Each clone gets a record of its state in the domain
     start = process.uptime();
     await Promise.all(this.clones.map((clone, i) => clone.transact({
-      '@id': `clone${i}`,
+      '@id': clone.id,
       '@type': 'Clone',
       name: `Clone${i}`,
       round: 0
@@ -50,27 +51,39 @@ exports.ChaosTest = class {
     return Promise.all(this.clones.map(clone => clone.destroy()));
   }
 
-  async test(roundProc/*(clone, index): Promise<DeleteInsert>*/) {
+  async test(roundProc/*(clone, round): Promise<DeleteInsert>*/) {
     const chaos = this;
+    // Gotcha: if a clone starts from a snapshot it will not natively have update events
+    this.clones.forEach(clone => clone.on('started', async () => {
+      const others = await clone.transact({
+        '@describe': '?c', '@where': { '@id': '?c', '@type': 'Clone' }
+      });
+      if (others.length !== this.clones.length)
+        process.exit(1); // FIXME: bit abrupt!
+      else
+        others.forEach(state => clone.emit('updated', state));
+    }));
+
     await Promise.all(this.clones.map((clone, i) => new Promise(async function nextRound(done) {
-      let { round } = (await clone.transact({ '@describe': `clone${i}` }))[0];
+      let { round } = (await clone.transact({ '@describe': clone.id }))[0];
       if (round < chaos.numRounds) {
         setTimeout(async () => {
-          const testUpdate = await roundProc.call(chaos, clone, i);
+          const testUpdate = await roundProc.call(chaos, clone, round);
           // Always update the clone's round count
           await clone.transact({
-            '@delete': [{ '@id': `clone${i}`, round }].concat(testUpdate['@delete']),
-            '@insert': [{ '@id': `clone${i}`, round: round + 1 }].concat(testUpdate['@insert'])
+            '@delete': [{ '@id': clone.id, round }].concat(testUpdate['@delete']),
+            '@insert': [{ '@id': clone.id, round: round + 1 }].concat(testUpdate['@insert'])
           });
           nextRound(done);
-        }, gaussRandom() * chaos.maxRoundDurationMillis);
+        }, gaussRandom() * chaos.meanRoundDurationMillis);
       } else {
         done();
       }
     })).concat(
       // Wait for all clones to see that all other clones have finished all rounds
-      this.clones.map(clone => Promise.all(this.clones.map((_, i) =>
-        clone.updated({ '@id': `clone${i}`, 'round': this.numRounds }))))));
+      this.clones.map(clone => Promise.all(this.clones.map(other =>
+        clone.updated({ '@id': other.id, round: this.numRounds }).then(() =>
+          console.log(`Clone ${clone.id} seen clone ${other.id} finish`)))))));
 
     // TODO: Use json-rql @orderBy
     const describeEntities = { '@describe': '?e', '@where': { '@id': '?e', '@type': 'Entity' } };

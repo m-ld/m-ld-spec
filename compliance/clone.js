@@ -28,8 +28,11 @@ module.exports = class Clone extends EventEmitter {
   async start() {
     const events = await send('start', { cloneId: this.id, domain });
     return new Promise((resolve, reject) => {
-      events.on('data', event => event['@type'] === 'started' ?
-        resolve(event) : this.emit(event['@type'], event.body));
+      events.on('data', event => {
+        if (event['@type'] === 'started')
+          resolve(event);
+        this.emit(event['@type'], event.body);
+      });
       events.on('end', () => this.emit('closed'));
       events.on('error', reject);
     });
@@ -119,7 +122,7 @@ async function send(message, params, body) {
     options.body = JSON.stringify(body);
     options.headers = { 'Content-Type': 'application/json' };
   }
-  const res = checkStatus(await fetch(url.toString(), options));
+  const res = checkStatus(await fetch(url.toString(), options), url);
   if (res.headers.get('transfer-encoding') === 'chunked') {
     return res.body.pipe(new Transform({
       objectMode: true,
@@ -136,11 +139,11 @@ async function send(message, params, body) {
   }
 };
 
-function checkStatus(res) {
+function checkStatus(res, url) {
   if (res.ok) // res.status >= 200 && res.status < 300
     return res;
   else
-    throw new Error(res.statusText);
+    throw new Error(`${url}: ${res.statusText}`);
 }
 
 function hasPath(obj, path) {
