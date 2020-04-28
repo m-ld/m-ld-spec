@@ -7,7 +7,7 @@ jasmine.getEnv().addReporter({
   specStarted: (result) =>
     domain = encodeURIComponent(result.fullName.toLowerCase().replace(/\s+/g, '-')) + '.m-ld.org'
 });
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 
 /**
  * A clone object wraps the orchestrator API for a single clone.

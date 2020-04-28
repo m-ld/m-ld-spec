@@ -45,6 +45,19 @@ exports.ChaosTest = class {
     })));
     // Calibrate an approximate transaction duration
     this.timings.transact = Math.floor((process.uptime() - start) * 1000);
+
+    // Gotcha: if a clone starts from a snapshot it will not natively have update events
+    this.clones.forEach(clone => clone.on('started', async () => {
+      const others = await clone.transact({
+        '@describe': '?c', '@where': { '@id': '?c', '@type': 'Clone' }
+      });
+      if (others.length !== this.clones.length) {
+        console.error(`${clone.id}: DATA LOSS: ${others.length} clones out of ${this.clones.length} visible.`);
+        process.exit(1); // FIXME: bit abrupt!
+      } else {
+        others.forEach(state => clone.emit('updated', state));
+      }
+    }));
   }
 
   async tearDown() {
@@ -53,17 +66,6 @@ exports.ChaosTest = class {
 
   async test(roundProc/*(clone, round): Promise<DeleteInsert>*/) {
     const chaos = this;
-    // Gotcha: if a clone starts from a snapshot it will not natively have update events
-    this.clones.forEach(clone => clone.on('started', async () => {
-      const others = await clone.transact({
-        '@describe': '?c', '@where': { '@id': '?c', '@type': 'Clone' }
-      });
-      if (others.length !== this.clones.length)
-        process.exit(1); // FIXME: bit abrupt!
-      else
-        others.forEach(state => clone.emit('updated', state));
-    }));
-
     await Promise.all(this.clones.map((clone, i) => new Promise(async function nextRound(done) {
       let { round } = (await clone.transact({ '@describe': clone.id }))[0];
       if (round < chaos.numRounds) {
@@ -83,7 +85,7 @@ exports.ChaosTest = class {
       // Wait for all clones to see that all other clones have finished all rounds
       this.clones.map(clone => Promise.all(this.clones.map(other =>
         clone.updated({ '@id': other.id, round: this.numRounds }).then(() =>
-          console.log(`Clone ${clone.id} seen clone ${other.id} finish`)))))));
+          console.log(`${clone.id} seen ${other.id} finish all rounds`)))))));
 
     // TODO: Use json-rql @orderBy
     const describeEntities = { '@describe': '?e', '@where': { '@id': '?e', '@type': 'Entity' } };

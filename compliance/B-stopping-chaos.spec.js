@@ -1,10 +1,10 @@
-const { ChaosTest, randomInt } = require('./chaos');
+const { ChaosTest, randomInt, safeStart } = require('./chaos');
 
 /**
  * Chaotic convergence with stopping (no killing)
  */
 describe('Stopping chaos', () => {
-  const NUM_CLONES = 2, NUM_ROUNDS = 20;
+  const NUM_CLONES = 5, NUM_ROUNDS = 20;
   let chaos;
 
   beforeEach(async () => {
@@ -20,7 +20,7 @@ describe('Stopping chaos', () => {
     let stopped = 0;
     return chaos.test(async clone => {
       // Randomly stop, pause and restart the clone
-      if (!randomInt(5) && stopped < NUM_CLONES - 1) {
+      if (!randomInt(8) && stopped < NUM_CLONES - 1) {
         stopped++;
         await clone.stop();
         await new Promise(fin => setTimeout(fin, chaos.timings.startClone));
