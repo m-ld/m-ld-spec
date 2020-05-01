@@ -13,30 +13,27 @@ describe('Colony', () => {
 
   it('clones start', async () => {
     await clone1.start();
-    const started = await clone2.start();
-    expect(started).toBeDefined();
+    await expectAsync(clone2.start()).toBeResolved();
   });
 
   it('clone can restart', async () => {
     await clone1.start();
     await clone2.start();
     await clone1.stop();
-    const started = await clone1.start();
-    return expect(started).toBeDefined();
+    await expectAsync(clone1.start()).toBeResolved();
   });
 
-  // This is obviously a usage problem, see m-ld#11
-  it('clone cannot restart alone', async () => {
+  it('clone can restart alone', async () => {
     await clone1.start();
     await clone2.start();
     await clone1.stop();
     await clone2.stop();
-    try {
-      await clone1.start();
-      fail();
-    } catch (err) { }
+    await expectAsync(clone1.start()).toBeResolved();
   });
 
-  afterEach(async () => await Promise.all([clone1.destroy(), clone2.destroy()]));
+  afterEach(async () => await Promise.all([
+    clone1.destroy(),
+    clone2.destroy()
+  ]));
 });
 

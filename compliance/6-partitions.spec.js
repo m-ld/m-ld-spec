@@ -4,12 +4,15 @@ const Clone = require('./clone');
  * Basic network partitions (no chaos)
  */
 describe('On partition', () => {
-  it('shuts down', async () => {
-    const clone = new Clone;
+  let clone;
+
+  beforeEach(() => clone = new Clone);
+
+  it('still accepts transactions', async () => {
     await clone.start();
-    return expectAsync(Promise.all([
-      clone.partition(),
-      clone.closed()
-    ])).toBeResolved();
+    await clone.partition();
+    await clone.transact({ '@id': 'fred', name: 'Fred' });
   });
+
+  afterEach(() => clone.destroy());
 });
