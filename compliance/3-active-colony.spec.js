@@ -35,13 +35,14 @@ describe('Active colony', () => {
   it('converges with deletion', async () => {
     await clones[0].transact({ '@id': 'fred', name: 'Fred' });
 
-    let updated = clones[1].updated('@insert', 'wilma');
-    await clones[0].transact({ '@id': 'wilma', name: 'Wilma' });
-    await updated;
+    await Promise.all([
+      clones[0].transact({ '@id': 'wilma', name: 'Wilma' }),
+      clones[1].updated('@insert', 'wilma')
+    ]);
 
-    updated = Promise.all(clones.map(clone => clone.updated('@delete', 'fred')));
-    await clones[1].transact({ '@delete': { '@id': 'fred' } });
-    await updated;
+    await Promise.all([
+      clones[1].transact({ '@delete': { '@id': 'fred' } })
+    ].concat(clones.map(clone => clone.updated('@delete', 'fred'))));
 
     for (let i = 0; i < clones.length; i++) {
       const subjects = await clones[i].transact({ '@describe': 'fred' });
