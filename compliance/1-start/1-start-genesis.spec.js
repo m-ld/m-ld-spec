@@ -1,4 +1,4 @@
-const Clone = require('./clone');
+const Clone = require('../clone');
 
 /**
  * Basic tests for start and transact on a genesis clone

@@ -1,4 +1,4 @@
-const Clone = require('./clone');
+const Clone = require('../clone');
 
 /**
  * Basic multi-clone startup tests (no transactions)

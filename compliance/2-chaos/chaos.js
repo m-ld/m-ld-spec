@@ -1,4 +1,4 @@
-const Clone = require('./clone');
+const Clone = require('../clone');
 
 const LOG_LEVEL = Number(process.env.LOG_LEVEL);
 
