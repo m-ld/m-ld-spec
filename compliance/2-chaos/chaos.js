@@ -1,4 +1,6 @@
-const Clone = require('./clone');
+const Clone = require('../clone');
+
+const LOG_LEVEL = Number(process.env.LOG_LEVEL);
 
 function compareById(e1, e2) {
   return e1['@id'] < e2['@id'] ? -1 : e1['@id'] > e2['@id'] ? 1 : 0;
@@ -84,8 +86,10 @@ exports.ChaosTest = class {
     })).concat(
       // Wait for all clones to see that all other clones have finished all rounds
       this.clones.map(clone => Promise.all(this.clones.map(other =>
-        clone.updated({ '@id': other.id, round: this.numRounds }).then(() =>
-          console.log(`${clone.id} seen ${other.id} finish all rounds`)))))));
+        clone.updated({ '@id': other.id, round: this.numRounds }).then(() => {
+          if (LOG_LEVEL < 2) // Info
+            console.log(`${clone.id} seen ${other.id} finish all rounds`);
+        }))))));
 
     // TODO: Use json-rql @orderBy
     const describeEntities = { '@describe': '?e', '@where': { '@id': '?e', '@type': 'Entity' } };

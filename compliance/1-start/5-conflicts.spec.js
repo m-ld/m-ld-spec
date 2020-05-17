@@ -1,4 +1,4 @@
-const Clone = require('./clone');
+const Clone = require('../clone');
 
 /**
  * Basic multi-clone transaction tests (no chaos)
@@ -15,8 +15,8 @@ describe('On conflict', () => {
     await Promise.all([
       clone1.transact({ '@id': 'fred', name: 'Fred' }),
       clone2.transact({ '@id': 'fred', name: 'Flintstone' }),
-      clone1.updated('Fred'),
-      clone1.updated('Flintstone')
+      clone2.updated('Fred'),
+      clone2.updated('Flintstone')
     ]);
 
     const subjects = await clone2.transact({ '@describe': 'fred' });

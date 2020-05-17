@@ -90,8 +90,8 @@ module.exports = class Clone extends EventEmitter {
    * http://orchestrator:port/kill?cloneId=hexclonid
    * => { '@type': 'partitioned' }
    */
-  async partition() {
-    return send('partition', { cloneId: this.id });
+  async partition(state = true) {
+    return send('partition', { cloneId: this.id, state });
   };
 
   /**
