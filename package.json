@@ -1,5 +1,5 @@
 {
-  "name": "@gsvarovsky/m-ld-spec",
+  "name": "@m-ld/m-ld-spec",
   "version": "0.2.0",
   "description": "m-ld Protocol Specification",
   "directories": {
