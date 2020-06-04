@@ -16,7 +16,7 @@ describe('Stopping chaos', () => {
 
   it('converges', () => {
     // We have to leave one clone running
-    // https://github.com/gsvarovsky/m-ld-spec/issues/5
+    // https://github.com/m-ld/m-ld-spec/issues/5
     let stopped = 0;
     return chaos.test(async clone => {
       // Randomly stop, pause and restart the clone

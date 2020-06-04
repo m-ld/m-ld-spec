@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gsvarovsky/m-ld-spec.git"
+    "url": "git+https://github.com/m-ld/m-ld-spec.git"
   },
   "keywords": [
     "m-ld"
@@ -19,9 +19,9 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/gsvarovsky/m-ld-spec/issues"
+    "url": "https://github.com/m-ld/m-ld-spec/issues"
   },
-  "homepage": "https://github.com/gsvarovsky/m-ld-spec#readme",
+  "homepage": "https://github.com/m-ld/m-ld-spec#readme",
   "dependencies": {
     "jasmine": "^3.5.0",
     "node-fetch": "^2.6.0"
