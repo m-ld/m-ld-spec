@@ -13,20 +13,17 @@ describe('Active colony', () => {
   });
 
   async function basicConvergenceTest(originator) {
-    const updated = Promise.all(clones.map(clone => clone.updated().then(update => {
+    clones[originator].transact({ '@id': 'fred', name: 'Fred' });
+    const updates = await Promise.all(clones.map(clone => clone.updated().then(update => {
       // Insist that the clones are updated only once
       clone.on('updated', fail);
       return update;
     })));
-    await clones[originator].transact({ '@id': 'fred', name: 'Fred' });
-    const updates = await updated;
-    for (let i = 0; i < clones.length; i++) {
-      if (i !== originator) {
-        const subjects = await clones[i].transact({ '@describe': 'fred' });
-        expect(subjects).toEqual([{ '@id': 'fred', name: 'Fred' }]);
-        expect(updates[i]).toEqual(updates[originator]);
-      }
-    }
+    clones.forEach(async (clone, i) => {
+      expect(updates[i]).toEqual(updates[originator]);
+      expect(await clone.transact({ '@describe': 'fred' }))
+        .toEqual([{ '@id': 'fred', name: 'Fred' }]);
+    });
   }
 
   it('converges from genesis clone', () => basicConvergenceTest(0));

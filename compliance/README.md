@@ -6,4 +6,4 @@ They assume the existence of a running 'orchestrator' of **m-ld** clones. An orc
 * Actors (Vert.x)
 * Images (Docker)
 
-So, the pattern is for the compliance test build step of a clone distribution is to start an orchestrator, and then run the tests in this package.
+So, the pattern is for the compliance test build step of a clone engine is to start an orchestrator, and then run the tests in this package.

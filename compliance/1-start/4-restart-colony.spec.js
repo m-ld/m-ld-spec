@@ -55,7 +55,10 @@ describe('Restart colony', () => {
     await genesis.transact(bambam);
 
     await clone1.start();
-    await genesis.updated('@id', 'wilma');
+    await Promise.all([
+      genesis.updated('@id', 'wilma'),
+      clone1.updated('@id', 'bambam')
+    ]);
 
     await expectAsync(genesis.transact({ '@describe': 'fred' })).toBeResolvedTo([fred]);
     await expectAsync(genesis.transact({ '@describe': 'wilma' })).toBeResolvedTo([wilma]);
@@ -63,6 +66,35 @@ describe('Restart colony', () => {
     await expectAsync(clone1.transact({ '@describe': 'fred' })).toBeResolvedTo([fred]);
     await expectAsync(clone1.transact({ '@describe': 'wilma' })).toBeResolvedTo([wilma]);
     await expectAsync(clone1.transact({ '@describe': 'bambam' })).toBeResolvedTo([bambam]);
+  });
+
+  it('converges after fork', async () => {
+    await clone1.start();
+    await Promise.all([
+      genesis.transact({ '@id': 'fred', name: 'Fred' }),
+      clone1.updated()
+    ]);
+    // Fork genesis again
+    const clone2 = new Clone;
+    await clone2.start();
+    // Check that a message from the forked clock gets through
+    await Promise.all([
+      clone2.transact({ '@id': 'barney', name: 'Barney' }),
+      clone1.updated('barney')
+    ]);
+    // Destroy clone2 (don't need it any more)
+    await clone2.destroy();
+    // Fork genesis again. Unfortunately, to fail with bad clock implementations
+    // this test requires that this new clone forks its clock from genesis,
+    // which is not something we can control right here. So we may get a false
+    // positive.
+    const clone3 = new Clone;
+    await clone3.start();
+    // Check that a message from the forked clock gets through
+    await Promise.all([
+      clone3.transact({ '@id': 'bambam', name: 'Bam-Bam' }),
+      clone1.updated('bambam')
+    ]);
   });
 
   it('converges after false silo', async () => {
