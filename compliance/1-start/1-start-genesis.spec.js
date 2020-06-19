@@ -25,8 +25,8 @@ describe('Genesis clone', () => {
     expect(subjects).toEqual([{ '@id': 'fred', name: 'Fred' }]);
     expect(update).toEqual({
       '@ticks': 1,
-      '@delete': { '@graph': [] },
-      '@insert': { '@graph': [{ '@id': 'fred', name: 'Fred' }] }
+      '@delete': [],
+      '@insert': [{ '@id': 'fred', name: 'Fred' }]
     });
   });
 

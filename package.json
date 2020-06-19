@@ -6,7 +6,7 @@
     "test": "test"
   },
   "scripts": {
-    "publish-patch": "npm version patch && git push && npm publish",
+    "prepublishOnly": "npm version $VERSION && git push",
     "test": "jasmine --config=compliance/jasmine.json"
   },
   "repository": {
