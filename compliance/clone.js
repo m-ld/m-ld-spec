@@ -8,6 +8,7 @@ jasmine.getEnv().addReporter({
     domain = encodeURIComponent(result.fullName.toLowerCase().replace(/\s+/g, '-')) + '.m-ld.org'
 });
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+let cloneNo = {/* domain: n */};
 
 /**
  * A clone object wraps the orchestrator API for a single clone.
@@ -15,7 +16,7 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 module.exports = class Clone extends EventEmitter {
   constructor() {
     super();
-    this.id = Math.floor(Math.random() * 0xFFFFFFFF).toString(16);
+    this.id = `clone${cloneNo[domain] = (cloneNo[domain] || 0) + 1}`;
   }
 
   /**

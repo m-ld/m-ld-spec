@@ -67,34 +67,39 @@ exports.ChaosTest = class {
   }
 
   async test(roundProc/*(clone, round): Promise<DeleteInsert>*/) {
-    const chaos = this;
-    await Promise.all(this.clones.map((clone, i) => new Promise(async function nextRound(done) {
-      let { round } = (await clone.transact({ '@describe': clone.id }))[0];
-      if (round < chaos.numRounds) {
-        setTimeout(async () => {
-          const testUpdate = await roundProc.call(chaos, clone, round);
-          // Always update the clone's round count
-          await clone.transact({
-            '@delete': [{ '@id': clone.id, round }].concat(testUpdate['@delete']),
-            '@insert': [{ '@id': clone.id, round: round + 1 }].concat(testUpdate['@insert'])
-          });
-          nextRound(done);
-        }, gaussRandom() * chaos.meanRoundDurationMillis);
-      } else {
-        done();
-      }
-    })).concat(
+    await Promise.all(this.clones.map(clone => this.nextRound(clone, roundProc))
       // Wait for all clones to see that all other clones have finished all rounds
-      this.clones.map(clone => Promise.all(this.clones.map(other =>
-        clone.updated({ '@id': other.id, round: this.numRounds }).then(() => {
-          if (LOG_LEVEL < 2) // Info
-            console.log(`${clone.id} seen ${other.id} finish all rounds`);
-        }))))));
-
+      .concat(this.clones.map(this.seenOthersFinish)));
+    
     // TODO: Use json-rql @orderBy
     const describeEntities = { '@describe': '?e', '@where': { '@id': '?e', '@type': 'Entity' } };
     const entities = (await this.clones[0].transact(describeEntities)).sort(compareById);
     return Promise.all(this.clones.slice(1).map(async clone =>
       expect((await clone.transact(describeEntities)).sort(compareById)).toEqual(entities)));
+  }
+
+  nextRound = async (clone, roundProc) => {
+    let { round } = (await clone.transact({ '@describe': clone.id }))[0];
+    if (round < this.numRounds) {
+      return new Promise(done => {
+        setTimeout(async () => {
+          const testUpdate = await roundProc.call(this, clone, round);
+          // Always update the clone's round count
+          await clone.transact({
+            '@delete': [{ '@id': clone.id, round }].concat(testUpdate['@delete']),
+            '@insert': [{ '@id': clone.id, round: round + 1 }].concat(testUpdate['@insert'])
+          });
+          this.nextRound(clone, roundProc).then(done);
+        }, gaussRandom() * this.meanRoundDurationMillis);
+      });
+    }
+  }
+
+  seenOthersFinish = clone => {
+    return Promise.all(this.clones.map(
+      other => clone.updated({ '@id': other.id, round: this.numRounds }).then(() => {
+        if (LOG_LEVEL < 2) // Info
+          console.log(`${clone.id} seen ${other.id} finish all rounds`);
+      })));
   }
 };
