@@ -19,11 +19,11 @@ describe('Active colony', () => {
       clone.on('updated', fail);
       return update;
     })));
-    clones.forEach(async (clone, i) => {
+    await Promise.all(clones.map(async (clone, i) => {
       expect(updates[i]).toEqual(updates[originator]);
       expect(await clone.transact({ '@describe': 'fred' }))
         .toEqual([{ '@id': 'fred', name: 'Fred' }]);
-    });
+    }));
   }
 
   it('converges from genesis clone', () => basicConvergenceTest(0));
