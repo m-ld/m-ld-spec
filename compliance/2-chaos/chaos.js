@@ -84,10 +84,11 @@ exports.ChaosTest = class {
       return new Promise(done => {
         setTimeout(async () => {
           const testUpdate = await roundProc.call(this, clone, round);
+          await clone.transact(testUpdate);
           // Always update the clone's round count
           await clone.transact({
-            '@delete': [{ '@id': clone.id, round }].concat(testUpdate['@delete']),
-            '@insert': [{ '@id': clone.id, round: round + 1 }].concat(testUpdate['@insert'])
+            '@delete': { '@id': clone.id, round },
+            '@insert': { '@id': clone.id, round: round + 1 }
           });
           this.nextRound(clone, roundProc).then(done);
         }, gaussRandom() * this.meanRoundDurationMillis);
