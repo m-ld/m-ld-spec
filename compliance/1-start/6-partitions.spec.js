@@ -65,5 +65,30 @@ describe('On partition', () => {
     ]);
   });
 
+  it('converges after partition from colony', async () => {
+    let clone2 = new Clone, clone3 = new Clone;
+    await clone1.start();
+    await clone2.start();
+    await clone3.start();
+    await Promise.all([
+      clone1.transact({ '@id': 'fred', name: 'Fred' }),
+      clone2.updated('@id', 'fred'),
+      clone3.updated('@id', 'fred')
+    ]);
+    await clone1.partition();
+
+    await Promise.all([
+      clone1.transact({ '@id': 'wilma', name: 'Wilma' }), // Undelivered
+      clone2.transact({ '@id': 'bambam', name: 'Bam-Bam' }),
+      clone3.updated('@id', 'bambam')
+    ]);
+    await clone1.partition(false);
+    await Promise.all([
+      expectAsync(clone1.updated('@id', 'bambam')).toBeResolved(),
+      expectAsync(clone2.updated('@id', 'wilma')).toBeResolved(),
+      expectAsync(clone3.updated('@id', 'wilma')).toBeResolved()
+    ]);
+  });
+
   afterEach(() => clone1.destroy());
 });
