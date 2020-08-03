@@ -7,6 +7,10 @@
   },
   "main": "types/index.js",
   "types": "types/index.d.ts",
+  "files": [
+    "compliance/*",
+    "types/*"
+  ],
   "scripts": {
     "prepublishOnly": "npm run build && npm version $VERSION && git push",
     "test": "jasmine --config=compliance/jasmine.json",
