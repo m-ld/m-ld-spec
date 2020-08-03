@@ -1,1 +1,6 @@
 node_modules
+
+# Generated output
+types/index.js
+types/index.d.ts
+_site/

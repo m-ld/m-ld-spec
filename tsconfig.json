@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "target": "es6",
+    "module": "none",
+    "moduleResolution": "node",
+    "declaration": true,
+    "strictNullChecks": true
+  },
+  "include": [
+    "types/index.ts"
+  ]
+}

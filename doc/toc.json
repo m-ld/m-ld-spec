@@ -1,0 +1,40 @@
+[
+  {
+    "url": "#architecture",
+    "title": "Architecture"
+  },
+  {
+    "url": "#terminology",
+    "title": "Terminology"
+  },
+  {
+    "url": "#clone-api",
+    "title": "Clone API",
+    "children": [
+      {
+        "url": "#initialisation",
+        "title": "Initialisation"
+      },
+      {
+        "url": "#transactions",
+        "title": "Transactions"
+      },
+      {
+        "url": "#events",
+        "title": "Events"
+      },
+      {
+        "url": "#status",
+        "title": "Status"
+      }
+    ]
+  },
+  {
+    "url": "#integrity",
+    "title": "Integrity"
+  },
+  {
+    "url": "#clone-protocol",
+    "title": "Clone Protocol"
+  }
+]

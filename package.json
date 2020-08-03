@@ -5,9 +5,13 @@
   "directories": {
     "test": "test"
   },
+  "main": "types/index.js",
+  "types": "types/index.d.ts",
   "scripts": {
-    "prepublishOnly": "npm version $VERSION && git push",
-    "test": "jasmine --config=compliance/jasmine.json"
+    "prepublishOnly": "npm run build && npm version $VERSION && git push",
+    "test": "jasmine --config=compliance/jasmine.json",
+    "build": "tsc && typedoc types/index.ts",
+    "doc-dev": "onchange \"doc/**/*.*\" \"types/index.ts\" -- npm run build & browser-sync start --server _site --files _site"
   },
   "repository": {
     "type": "git",
@@ -23,7 +27,16 @@
   },
   "homepage": "https://github.com/m-ld/m-ld-spec#readme",
   "dependencies": {
-    "jasmine": "^3.5.0",
-    "node-fetch": "^2.6.0"
+    "jasmine": "^3.6.1",
+    "json-rql": "^0.4.0-1",
+    "node-fetch": "^2.6.0",
+    "rxjs": "^6.6.2"
+  },
+  "devDependencies": {
+    "@m-ld/typedoc-theme": "^0.1.1",
+    "browser-sync": "^2.26.12",
+    "onchange": "^7.0.2",
+    "typedoc": "^0.17.8",
+    "typescript": "^3.9.7"
   }
 }
