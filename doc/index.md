@@ -2,12 +2,10 @@
 
 # **m-ld** Specification
 This documentation presents the implementation-independent technical
-specification of **m-ld**. It covers high-level component and deployment
-architecture, and internal and external APIs and protocols. Principles,
-discussion of use-cases, a list clone engine implementations, and guiding
-narrative can be found on the **m-ld** [documentation portal](http://m-ld.org/doc).
-
-[[include:architecture.md]]
+specification of **m-ld**. It covers internal and external APIs and protocols.
+Architecture, principles, use-cases, a list of clone engine implementations, and
+guiding narrative can be found on the **m-ld**
+[documentation&nbsp;portal](http://m-ld.org/doc).
 
 [[include:terminology.md]]
 
