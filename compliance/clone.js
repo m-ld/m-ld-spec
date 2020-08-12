@@ -13,9 +13,10 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
  * A clone object wraps the orchestrator API for a single clone.
  */
 module.exports = class Clone extends EventEmitter {
-  constructor() {
+  constructor(config) {
     super();
     this.id = Math.floor(Math.random() * 0xFFFFFFFF).toString(16);
+    this.config = config;
   }
 
   /**
@@ -23,10 +24,11 @@ module.exports = class Clone extends EventEmitter {
    * The 'start' end-point sets up an HTTP Stream. The first chunk is the 'started' message;
    * all subsequent chunks are 'updated' messages, which are emitted by this class as events.
    * http://orchestrator:port/start?cloneId=hexclonid&domain=full-test-name.m-ld.org
+   * <= config: { constraint: { '@type'... } }
    * => { '@type': 'started' }, { '@type: 'updated', body: DeleteInsert }...
    */
   async start() {
-    const events = await send('start', { cloneId: this.id, domain });
+    const events = await send('start', { cloneId: this.id, domain }, this.config);
     return new Promise((resolve, reject) => {
       events.on('data', event => {
         if (event['@type'] === 'started')

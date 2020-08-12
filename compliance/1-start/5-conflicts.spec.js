@@ -26,6 +26,30 @@ describe('On conflict', () => {
     expect(subjects[0].name.includes('Flintstone')).toBe(true);
   });
 
+  it('leaves partial subjects', async () => {
+    await Promise.all([
+      clone1.transact({ '@id': 'fred', name: 'Fred', height: 5 }),
+      clone2.updated('Fred'),
+    ]);
+
+    await Promise.all([
+      // Delete the whole subject
+      clone1.transact({ '@delete': { '@id': 'fred', name: 'Fred', height: 5 } }),
+      // Concurrently, update the height
+      clone2.transact({
+        '@delete': { '@id': 'fred', height: 5 },
+        '@insert': { '@id': 'fred', height: 6 }
+      }),
+      clone1.updated('@insert', 'height', 6),
+      clone2.updated('@delete', 'Fred')
+    ]);
+
+    const subjects = await clone1.transact({ '@describe': 'fred' });
+    expect(subjects.length).toBe(1);
+    expect(subjects[0].name).toBeUndefined();
+    expect(subjects[0].height).toBe(6);
+  });
+
   afterEach(async () => {
     await clone1.destroy();
     await clone2.destroy();
