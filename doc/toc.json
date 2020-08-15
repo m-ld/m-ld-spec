@@ -26,8 +26,8 @@
     ]
   },
   {
-    "url": "#integrity",
-    "title": "Integrity"
+    "url": "#concurrency",
+    "title": "Concurrency"
   },
   {
     "url": "#clone-protocol",

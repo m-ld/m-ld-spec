@@ -11,6 +11,6 @@ guiding narrative can be found on the **m-ld**
 
 [[include:clone-api.md]]
 
-[[include:integrity.md]]
+[[include:concurrency.md]]
 
 [[include:clone-protocol.md]]
