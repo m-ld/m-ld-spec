@@ -37,7 +37,7 @@
     "rxjs": "^6.6.2"
   },
   "devDependencies": {
-    "@m-ld/typedoc-theme": "^0.1.2",
+    "@m-ld/typedoc-theme": "^0.1.3",
     "browser-sync": "^2.26.12",
     "onchange": "^7.0.2",
     "typedoc": "^0.17.8",

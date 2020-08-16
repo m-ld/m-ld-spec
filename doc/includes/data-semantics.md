@@ -57,9 +57,9 @@ Declarative constraints have two modes of operation:
    for which are defined in the constraint. This mechanism catches invariant
    violations arising due to conflicts between clone updates.
 
-The following is a list of candidate declarable constraints and their
-configuration options. See the [engine](https://m-ld.org/doc/#platforms)
-documentation for supported constraints and syntax.
+The following is a list of candidate declarable constraints. See the
+[engine](https://m-ld.org/doc/#platforms) documentation for supported
+constraints and syntax.
 
 - `single-valued`: A subject property must have a single atomic value.
   
