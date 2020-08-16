@@ -3,13 +3,11 @@ import { Observable } from 'rxjs';
 
 /**
  * A **m-ld** clone represents domain data to an app. This interface is
- * implemented by a clone engine. It adheres to the **m-ld** data consistency
- * contract. It may offer additional data features, such as data persistence
- * between re-starts; and API features such as language-specific convenience
- * methods. Refer to the clone engine documentation for details.
- *
- * @see /#clone-api
- * @see http://m-ld.org/doc/#concurrency
+ * implemented by a clone engine. It adheres to the **m-ld** data
+ * [concurrency](https://m-ld.org/doc/#concurrency) contract. It may offer
+ * additional data features, such as data persistence between re-starts; and API
+ * features such as language-specific convenience methods. Refer to the clone
+ * [engine](https://m-ld.org/doc/#platforms) documentation for details.
  */
 export interface MeldClone {
   /**

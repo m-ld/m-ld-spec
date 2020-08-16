@@ -44,7 +44,8 @@ empty stream.
 > **json-rql** is a superset of JSON-LD, designed for query expressions. The
 > following provides an informal introduction to the syntax. Note that clone
 > engines may legitimately offer a limited subset of the full **json-rql**
-> syntax. Check the engine documentation for details.
+> syntax. Check the [engine](https://m-ld.org/doc/#platforms) documentation for
+> details.
 
 The simplest transaction inserts some data. In this case the transaction
 description is just the data, a JSON subject, such as:
@@ -90,9 +91,9 @@ A key difference between **m-ld** and typical JSON stores is that in **m-ld**,
 the JSON is a representation of a graph, and there is no storage of the original
 structure of any subject.
 
-In particular, this affects how write transactions are processed. All raw
-subject transactions are treated as *insertions* to the data that already
-exists. For example, following the above transactions with:
+This affects how write transactions are processed. All raw subject transactions
+are treated as *insertions* to the data that already exists. For example,
+following the above transactions with:
 ```json
 {
   "@id": "fred",
@@ -123,6 +124,9 @@ remove unwanted old data. This can be done with the more verbose
   }
 }
 ```
+
+See the [Data&nbsp;Semantics](#data-semantics) section below for more detail of
+subject representation.
 
 > The need for explicit removal of prior data can lead to unexpected data
 > structure changes if not accounted for. Some clone engines provide an explicit
@@ -198,7 +202,8 @@ the app can make a query to retrieve current state.
 > local logical clock `ticks`, which can be used by the clone engine to identify
 > a specific data snapshot. However due to differences in engine data stores and
 > language concurrency models, engines may vary in how this field is used. Check
-> the engine documentation for the necessary details.
+> the [engine](https://m-ld.org/doc/#platforms) documentation for the necessary
+> details.
 
 ### Status
 A clone engine's status can be obtained using the

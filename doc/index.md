@@ -13,4 +13,6 @@ guiding narrative can be found on the **m-ld**
 
 [[include:concurrency.md]]
 
+[[include:data-semantics.md]]
+
 [[include:clone-protocol.md]]

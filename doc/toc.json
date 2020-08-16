@@ -30,6 +30,10 @@
     "title": "Concurrency"
   },
   {
+    "url": "#data-semantics",
+    "title": "Data Semantics"
+  },
+  {
     "url": "#clone-protocol",
     "title": "Clone Protocol"
   }
