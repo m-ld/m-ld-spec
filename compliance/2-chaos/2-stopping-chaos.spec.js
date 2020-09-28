@@ -1,4 +1,4 @@
-const { ChaosTest, randomInt, safeStart } = require('./chaos');
+const { ChaosTest, randomInt } = require('./chaos');
 
 /**
  * Chaotic convergence with stopping (no killing)

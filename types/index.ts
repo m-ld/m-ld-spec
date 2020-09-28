@@ -132,10 +132,15 @@ export enum MeldErrorStatus {
   //////////////////////////////////////////////////////////////////////////////
   // Bad request errors
   /**
-   * A **json-rql** pattern has neen specified that neither reads nor writes
+   * A **json-rql** pattern has been specified that neither reads nor writes
    * data, for example a Group with variable content.
    */
   'Pattern is not read or writeable' = 4001,
+  /**
+   * The requested transaction results in a delta that is too large to transmit
+   * using the current message publishing implementation.
+   */
+  'Delta too big' = 4002,
 
   //////////////////////////////////////////////////////////////////////////////
   // Not found errors
