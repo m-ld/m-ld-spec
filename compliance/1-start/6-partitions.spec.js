@@ -4,9 +4,12 @@ const Clone = require('../clone');
  * Basic network partitions (no chaos)
  */
 describe('On partition', () => {
-  let clone1;
+  let clone1, clone2, clone3;
 
-  beforeEach(() => clone1 = new Clone);
+  beforeEach(() => {
+    clone1 = new Clone;
+    clone2 = clone3 = undefined;
+  });
 
   it('still accepts transactions', async () => {
     await clone1.start();
@@ -18,7 +21,7 @@ describe('On partition', () => {
   });
 
   it('converges after partition', async () => {
-    let clone2 = new Clone;
+    clone2 = new Clone;
     await clone1.start();
     await clone2.start();
     await Promise.all([
@@ -39,7 +42,7 @@ describe('On partition', () => {
   });
 
   it('converges after partition and close', async () => {
-    let clone2 = new Clone;
+    clone2 = new Clone;
     await clone1.start();
     await clone2.start();
     await Promise.all([
@@ -66,7 +69,8 @@ describe('On partition', () => {
   });
 
   it('converges after partition from colony', async () => {
-    let clone2 = new Clone, clone3 = new Clone;
+    clone2 = new Clone;
+    clone3 = new Clone;
     await clone1.start();
     await clone2.start();
     await clone3.start();
@@ -90,5 +94,9 @@ describe('On partition', () => {
     ]);
   });
 
-  afterEach(() => clone1.destroy());
+  afterEach(async () => {
+    await clone1.destroy();
+    clone2 && await clone2.destroy();
+    clone3 && await clone3.destroy();
+  });
 });
