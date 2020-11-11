@@ -179,9 +179,15 @@ export enum MeldErrorStatus {
   'Request rejected' = 5003,
   /**
    * The engine has attempted an operation that requires other clones to be
-   * visible. This typically indicates a concurrency problem in the engine.
+   * visible. This indicates a concurrency problem in the engine.
    */
   'Meld is offline' = 5004,
+  /**
+   * An update from another clone has arrived out-of-order, and the clone has
+   * not been able to recover. This indicates a concurrency problem in the
+   * engine.
+   */
+  'Update out of order' = 5005,
 
   //////////////////////////////////////////////////////////////////////////////
   // Unsupported operations
@@ -206,5 +212,12 @@ export enum MeldErrorStatus {
    * The clone data is not writeable due to a platform limitation such as file
    * locking, or concurrent access controls.
    */
-  'Clone data is locked' = 5034
+  'Clone data is locked' = 5034,
+  /**
+   * The clone's data is out of date and no other clones have kept sufficient
+   * information to recover it. The app could re-try initialising the clone
+   * later if, for example, the architecture includes a clone which keeps a long
+   * history, but it is currently unavailable.
+   */
+  'Clone outdated' = 5035
 }

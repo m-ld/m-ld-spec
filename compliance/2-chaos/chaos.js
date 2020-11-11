@@ -75,7 +75,8 @@ exports.ChaosTest = class {
     const describeEntities = { '@describe': '?e', '@where': { '@id': '?e', '@type': 'Entity' } };
     const entities = (await this.clones[0].transact(describeEntities)).sort(compareById);
     return Promise.all(this.clones.slice(1).map(async clone =>
-      expect((await clone.transact(describeEntities)).sort(compareById)).toEqual(entities)));
+      expect((await clone.transact(describeEntities)).sort(compareById))
+        .withContext(`Clone ${clone.id}`).toEqual(entities)));
   }
 
   nextRound = async (clone, roundProc) => {
