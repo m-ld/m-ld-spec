@@ -54,8 +54,7 @@ exports.ChaosTest = class {
         '@describe': '?c', '@where': { '@id': '?c', '@type': 'Clone' }
       });
       if (others.length !== this.clones.length) {
-        console.error(`${clone.id}: DATA LOSS: ${others.length} clones out of ${this.clones.length} visible.`);
-        process.exit(1); // FIXME: bit abrupt!
+        fail(`${clone.id}: DATA LOSS: ${others.length} clones out of ${this.clones.length} visible.`);
       } else {
         others.forEach(state => clone.emit('updated', state));
       }
