@@ -34,12 +34,24 @@ describe('Single-valued property', () => {
     await Promise.all(
       clones.slice(1).map(clone => clone.start()));
 
-    await Promise.all([
+    const outcomes = await Promise.all(clones.map((clone, i) =>
       // Every clone inserts its own name
-      ...clones.map((clone, i) => clone.transact({ '@id': 'fred', name: 'Fred' + i })),
-      // And all but the last clone sees their name squashed
-      ...clones.slice(0, -1).map((clone, i) => clone.updated('@delete', 'Fred' + i))
-    ]);
+      clone.transact({ '@id': 'fred', name: 'Fred' + i }).then(
+        // All but the last clone sees their name squashed
+        async () => {
+          if (i < 4)
+            await clone.updated('@delete', 'Fred' + i);
+          return 'squashed';
+        },
+        // OR they got someone else's name first and failed. This should be rare
+        // because it requires the clone to be very slow to accept the txn.
+        err => {
+          if (!`${err}`.includes('Multiple values'))
+            throw err;
+          return 'rejected';
+        })));
+    if (!outcomes.includes('squashed'))
+      fail('Invalid test: all clones rejected the conflict');
 
     const subjectses = await Promise.all(
       clones.map(clone => clone.transact({ '@describe': 'fred' })));
