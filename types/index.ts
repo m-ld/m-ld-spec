@@ -1,29 +1,48 @@
-import { Subject, Pattern } from 'json-rql';
+import { Subject, Read, Group, Update } from 'json-rql';
 import { Observable } from 'rxjs';
 
 /**
- * A **m-ld** clone represents domain data to an app. This interface is
- * implemented by a clone engine. It adheres to the **m-ld** data
- * [concurrency](https://m-ld.org/doc/#concurrency) contract. It may offer
- * additional data features, such as data persistence between re-starts; and API
- * features such as language-specific convenience methods. Refer to the clone
- * [engine](https://m-ld.org/doc/#platforms) documentation for details.
+ * A **m-ld** clone represents domain data to an app. This is the abstract
+ * interface implemented by a clone engine. It adheres to the **m-ld** data
+ * [concurrency](https://m-ld.org/doc/#concurrency) contract.
+ *
+ * > This abstract definition will be realised differently depending on the
+ * > capabilities and idioms of the engine platform. It may offer additional
+ * > data features, such as data persistence between re-starts; and API features
+ * > such as language-specific convenience methods. Refer to the clone
+ * > [engine](https://m-ld.org/doc/#platforms) documentation to begin using it.
  */
 export interface MeldClone {
   /**
-   * Actively reads data from, or writes data to, the domain.
+   * Actively reads data from the domain.
+   *
+   * An engine can legitimately offer a limited subset of the full **json-rql**
+   * syntax for the `request` parameter, and reject patterns that it does not
+   * support with an `Unsupported pattern` error.
+   *
+   * @param request the declarative read description
+   * @returns an observable stream of subjects.
+   * @see [Read](http://json-rql.org/interfaces/read.html)
+   * @see [Subject](http://json-rql.org/interfaces/subject.html)
+   */
+  read(request: Read): Observable<Subject>;
+  /**
+   * Actively writes data to the domain. A write can be:
+   * - A [Subject](http://json-rql.org/interfaces/subject.html) (any JSON object
+   *   not a Read, Group or Update). Interpreted as data to be inserted.
+   * - A [Group](http://json-rql.org/interfaces/group.html) containing only a
+   *   `@graph` key. Interpreted as containing the data to be inserted.
+   * - An [Update](http://json-rql.org/interfaces/update.html) with either an
+   *   `@insert`, `@delete`, or both.
    *
    * An engine can legitimately offer a limited subset of the full **json-rql**
    * syntax for the `request` parameter, and reject patterns that it does not
    * support with an `Unsupported pattern` error.
    *
    * @param request the declarative transaction description
-   * @returns an observable stream of subjects. For a write transaction, this is
-   * empty, but indicates final completion or error of the transaction.
-   * @see http://json-rql.org/interfaces/pattern.html
-   * @see http://json-rql.org/interfaces/subject.html
+   * @returns final completion or error of the transaction.
    */
-  transact(request: Pattern): Observable<Subject>;
+  write(request: Subject | Group | Update): Promise<unknown>;
   /**
    * Follow updates from the domain. All data changes are signalled through the
    * returned stream, strictly ordered according to the clone's logical clock.
@@ -179,9 +198,15 @@ export enum MeldErrorStatus {
   'Request rejected' = 5003,
   /**
    * The engine has attempted an operation that requires other clones to be
-   * visible. This typically indicates a concurrency problem in the engine.
+   * visible. This indicates a concurrency problem in the engine.
    */
   'Meld is offline' = 5004,
+  /**
+   * An update from another clone has arrived out-of-order, and the clone has
+   * not been able to recover. This indicates a concurrency problem in the
+   * engine.
+   */
+  'Update out of order' = 5005,
 
   //////////////////////////////////////////////////////////////////////////////
   // Unsupported operations
@@ -206,5 +231,12 @@ export enum MeldErrorStatus {
    * The clone data is not writeable due to a platform limitation such as file
    * locking, or concurrent access controls.
    */
-  'Clone data is locked' = 5034
+  'Clone data is locked' = 5034,
+  /**
+   * The clone's data is out of date and no other clones have kept sufficient
+   * information to recover it. The app could re-try initialising the clone
+   * later if, for example, the architecture includes a clone which keeps a long
+   * history, but it is currently unavailable.
+   */
+  'Clone outdated' = 5035
 }

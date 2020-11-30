@@ -19,10 +19,11 @@ transactions. To initialise, it must be configured with (at least):
 > existing systems. However, it is not generally necessary for users to have
 > intimate knowledge of JSON-LD and Linked Data unless in advanced use-cases.
 
-The [clone API](interfaces/meldclone.html) comprises two primary methods for
+The [clone API](interfaces/meldclone.html) comprises three primary methods for
 interacting with data:
-- _Active_ transactions, for an app to read and write data: `transact`
-- _Passive_ events, for an app to react to data changes: `follow`
+- _Read_ transactions, for an app to read data
+- _Write_ transactions, for an app to write data
+- _Followed_ events, for an app to react to data changes
 
 In addition, it is possible to react to clone status via the `status` property.
 
@@ -31,13 +32,12 @@ if possible, rev-up with recent updates from the domain. See the
 [Clone Protocol](#clone-protocol) for more details.
 
 ### Transactions
-The [`transact`](interfaces/meldclone.html#transact) API supports both read and
-write of data. It takes a single parameter, a JSON object which declaratively
-describes the transaction. The method returns an observable stream of
-*subjects*, which represent query results – for write transactions, this is an
-empty stream.
+The [`read`](interfaces/meldclone.html#read) and
+[`write`](interfaces/meldclone.html#write) APIs take a single parameter, a JSON
+object which declaratively describes the transaction. The read method returns an
+observable stream of *subjects*, which represent query results.
 
-> The transaction JSON object and each returned subject are a
+> The transaction request JSON object and each returned subject are a
 > [**json-rql**](https://json-rql.org/)
 > [Pattern](https://json-rql.org/interfaces/pattern.html) and
 > [Subject](https://json-rql.org/interfaces/subject.html), respectively.
@@ -130,9 +130,9 @@ subject representation.
 
 > The need for explicit removal of prior data can lead to unexpected data
 > structure changes if not accounted for. Some clone engines provide an explicit
-> `PUT`-like API to reduce verbosity. However similar situations can also arise
-> due to concurrent data changes, so it is important for an app to be aware of
-> this characteristic.
+> `PUT`- or `UPDATE`-like API to reduce verbosity. However similar situations
+> can also arise due to concurrent data changes, so it is important for an app
+> to be aware of this characteristic.
 
 The query language also supports `@select` statements, which are able to gather
 data values in arbitrarily complex ways from subjects in the domain. This

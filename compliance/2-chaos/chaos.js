@@ -17,9 +17,23 @@ function gaussRandom() {
 /**
  * Random integer [0, upper)
  */
-exports.randomInt = function randomInt(upper) {
+function randomInt(upper) {
   return Math.floor(Math.random() * upper);
 };
+exports.randomInt = randomInt;
+
+exports.updateRandomEntityProperty = async function (clone,
+  numEntities = 10, numProperties = 4, numValues = 4) {
+  const id = `entity${randomInt(numEntities).toString(16)}`;
+  const prop = `prop${randomInt(numProperties).toString(16)}`;
+  const value = randomInt(numValues).toString(16);
+  const existing = await clone.transact({ '@describe': id });
+  const oldValue = (existing.length ? existing[0] : {})[prop];
+  return {
+    '@delete': oldValue ? { '@id': id, [prop]: oldValue } : [],
+    '@insert': { '@id': id, '@type': 'Entity', [prop]: value }
+  };
+}
 
 exports.ChaosTest = class {
   constructor(numClones, numRounds) {
@@ -54,8 +68,7 @@ exports.ChaosTest = class {
         '@describe': '?c', '@where': { '@id': '?c', '@type': 'Clone' }
       });
       if (others.length !== this.clones.length) {
-        console.error(`${clone.id}: DATA LOSS: ${others.length} clones out of ${this.clones.length} visible.`);
-        process.exit(1); // FIXME: bit abrupt!
+        fail(`${clone.id}: DATA LOSS: ${others.length} clones out of ${this.clones.length} visible.`);
       } else {
         others.forEach(state => clone.emit('updated', state));
       }
@@ -67,7 +80,7 @@ exports.ChaosTest = class {
   }
 
   async test(roundProc/*(clone, round): Promise<DeleteInsert>*/) {
-    await Promise.all(this.clones.map(clone => this.nextRound(clone, roundProc))
+    await Promise.all(this.clones.map((clone, i) => this.nextRound(clone, roundProc, i))
       // Wait for all clones to see that all other clones have finished all rounds
       .concat(this.clones.map(this.seenOthersFinish)));
     
@@ -75,22 +88,23 @@ exports.ChaosTest = class {
     const describeEntities = { '@describe': '?e', '@where': { '@id': '?e', '@type': 'Entity' } };
     const entities = (await this.clones[0].transact(describeEntities)).sort(compareById);
     return Promise.all(this.clones.slice(1).map(async clone =>
-      expect((await clone.transact(describeEntities)).sort(compareById)).toEqual(entities)));
+      expect((await clone.transact(describeEntities)).sort(compareById))
+        .withContext(`Clone ${clone.id}`).toEqual(entities)));
   }
 
-  nextRound = async (clone, roundProc) => {
+  nextRound = async (clone, roundProc, i) => {
     let { round } = (await clone.transact({ '@describe': clone.id }))[0];
     if (round < this.numRounds) {
       return new Promise(done => {
         setTimeout(async () => {
-          const testUpdate = await roundProc.call(this, clone, round);
+          const testUpdate = await roundProc.call(this, clone, round, i);
           await clone.transact(testUpdate);
           // Always update the clone's round count
           await clone.transact({
             '@delete': { '@id': clone.id, round },
             '@insert': { '@id': clone.id, round: round + 1 }
           });
-          this.nextRound(clone, roundProc).then(done);
+          this.nextRound(clone, roundProc, i).then(done);
         }, gaussRandom() * this.meanRoundDurationMillis);
       });
     }

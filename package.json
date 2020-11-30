@@ -1,6 +1,6 @@
 {
   "name": "@m-ld/m-ld-spec",
-  "version": "0.4.2",
+  "version": "0.5.0-2",
   "description": "m-ld Protocol Specification",
   "directories": {
     "test": "test"
@@ -31,16 +31,16 @@
   },
   "homepage": "https://github.com/m-ld/m-ld-spec#readme",
   "dependencies": {
-    "jasmine": "^3.6.1",
+    "jasmine": "^3.6.3",
     "json-rql": "^0.5.0",
-    "node-fetch": "^2.6.0",
-    "rxjs": "^6.6.2"
+    "node-fetch": "^2.6.1",
+    "rxjs": "^6.6.3"
   },
   "devDependencies": {
-    "@m-ld/typedoc-theme": "^0.1.3",
-    "browser-sync": "^2.26.12",
-    "onchange": "^7.0.2",
-    "typedoc": "^0.17.8",
-    "typescript": "^3.9.7"
+    "@m-ld/typedoc-theme": "^0.1.4",
+    "browser-sync": "^2.26.13",
+    "onchange": "^7.1.0",
+    "typedoc": "^0.19.2",
+    "typescript": "^4.1.2"
   }
 }

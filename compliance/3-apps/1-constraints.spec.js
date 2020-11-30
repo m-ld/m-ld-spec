@@ -15,25 +15,10 @@ describe('Single-valued property', () => {
     await Promise.all([
       clones[0].transact({ '@id': 'fred', name: 'Fred' }),
       clones[1].transact({ '@id': 'fred', name: 'Flintstone' }),
-      (async () => {
-        await clones[0].updated('@delete', 'Flintstone');
-        // Also expecting clone[1]'s resolution
-        await clones[0].updated('@delete', 'Flintstone');
-      })(),
-      (async () => {
-        await clones[1].updated({ '@delete': 'Flintstone', '@insert': 'Fred' });
-        // Also expecting clone[0]'s resolution
-        await clones[1].updated('@delete', 'Flintstone');
-      })()
+      clones[0].updated({ '@insert': 'Fred' }),
+      // clones[0] never sees 'Flintstone' in its updates
+      clones[1].updated({ '@delete': 'Flintstone', '@insert': 'Fred' })
     ]);
-
-    // All updates look like this:
-    // clone[0] { "@ticks": 1, "@delete": [], "@insert": [{ "@id": "fred", "name": "Fred" }] }
-    // clone[1] { "@ticks": 1, "@delete": [], "@insert": [{ "@id": "fred", "name": "Flintstone" }] }
-    // clone[1] { "@ticks": 3, "@delete": [{ "@id": "fred", "name": "Flintstone" }], "@insert": [{ "@id": "fred", "name": "Fred" }] }
-    // clone[0] { "@ticks": 3, "@delete": [{ "@id": "fred", "name": "Flintstone" }], "@insert": [] }
-    // clone[1] { "@ticks": 4, "@delete": [{ "@id": "fred", "name": "Flintstone" }], "@insert": [] }
-    // clone[0] { "@ticks": 4, "@delete": [{ "@id": "fred", "name": "Flintstone" }], "@insert": [] }
 
     const subjects1 = await clones[0].transact({ '@describe': 'fred' });
     const subjects2 = await clones[1].transact({ '@describe': 'fred' });
@@ -49,10 +34,24 @@ describe('Single-valued property', () => {
     await Promise.all(
       clones.slice(1).map(clone => clone.start()));
 
-    await Promise.all(
-      clones.map((clone, i) => clone.transact({ '@id': 'fred', name: 'Fred' + i }))
-        .concat(clones.map(clone => Promise.all(
-          clones.slice(0, -1).map((_, i) => clone.updated('@delete', 'Fred' + i))))));
+    const outcomes = await Promise.all(clones.map((clone, i) =>
+      // Every clone inserts its own name
+      clone.transact({ '@id': 'fred', name: 'Fred' + i }).then(
+        // All but the last clone sees their name squashed
+        async () => {
+          if (i < 4)
+            await clone.updated('@delete', 'Fred' + i);
+          return 'squashed';
+        },
+        // OR they got someone else's name first and failed. This should be rare
+        // because it requires the clone to be very slow to accept the txn.
+        err => {
+          if (!`${err}`.includes('Multiple values'))
+            throw err;
+          return 'rejected';
+        })));
+    if (!outcomes.includes('squashed'))
+      fail('Invalid test: all clones rejected the conflict');
 
     const subjectses = await Promise.all(
       clones.map(clone => clone.transact({ '@describe': 'fred' })));
@@ -61,7 +60,7 @@ describe('Single-valued property', () => {
     subjectses.forEach(subjects => expect(subjects).toEqual(subjectses[0]))
   });
 
-  it('does not redo constraints on rev-up', async () => {
+  it('applies constraints on rev-up', async () => {
     clones = Array(3).fill().map(() => new Clone(
       { constraint: { '@type': 'single-valued', property: 'name' } }));
     await clones[0].start();
@@ -80,25 +79,18 @@ describe('Single-valued property', () => {
     await Promise.all([
       clones[0].transact({ '@id': 'fred', name: 'Fred' }),
       clones[1].transact({ '@id': 'fred', name: 'Flintstone' }),
-      (async () => {
-        await clones[0].updated('@delete', 'Flintstone');
-        // Also expecting clone[1]'s resolution
-        await clones[0].updated('@delete', 'Flintstone');
-      })(),
-      (async () => {
-        await clones[1].updated({ '@delete': 'Flintstone', '@insert': 'Fred' });
-        // Also expecting clone[0]'s resolution
-        await clones[1].updated('@delete', 'Flintstone');
-      })()
+      clones[0].updated({ '@insert': 'Fred' }),
+      clones[1].updated({ '@delete': 'Flintstone', '@insert': 'Fred' })
     ]);
 
-    // Not expecting any constraint-resolution from the startup of clone[2]
-    clones[0].on('updated', () => fail());
+    // Not expecting to see any constraint-resolution from the startup of
+    // clone[2], due to suppression of a no-op
+    clones[0].on('updated', update => fail(update));
 
     await Promise.all([
       clones[2].start(),
-      clones[2].updated('@insert', 'Fred'),
-      clones[2].updated('@delete', 'Flintstone')
+      // We might see insert 'Flintstone' as well, depends on ordering
+      clones[2].updated('@insert', 'Fred')
     ]);
 
     const subjects = await clones[2].transact({ '@describe': 'fred' });

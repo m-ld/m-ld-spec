@@ -1,4 +1,4 @@
-const { ChaosTest, randomInt } = require('./chaos');
+const { ChaosTest, randomInt, updateRandomEntityProperty } = require('./chaos');
 
 /**
  * Chaotic convergence with stopping (no killing)
@@ -14,9 +14,7 @@ describe('Stopping chaos', () => {
     chaos.meanRoundDurationMillis = chaos.timings.transact * 1.5;
   });
 
-  it('converges', () => {
-    // We have to leave one clone running
-    // https://github.com/m-ld/m-ld-spec/issues/5
+  it('converges with at least one running', () => {
     let stopped = 0;
     return chaos.test(async clone => {
       // Randomly stop, pause and restart the clone
@@ -27,15 +25,23 @@ describe('Stopping chaos', () => {
         await clone.start();
         stopped--;
       }
-      const id = `entity${randomInt(10).toString(16)}`;
-      const prop = `prop${randomInt(4).toString(16)}`;
-      const value = randomInt(4).toString(16);
-      const existing = await clone.transact({ '@describe': id });
-      const oldValue = (existing.length ? existing[0] : {})[prop];
-      return {
-        '@delete': oldValue ? { '@id': id, [prop]: oldValue } : [],
-        '@insert': { '@id': id, '@type': 'Entity', [prop]: value }
-      };
+      return updateRandomEntityProperty(clone);
+    });
+  });
+
+  it('converges with maybe none running', () => {
+    let stopped = 0;
+    return chaos.test(async clone => {
+      // Stop about once in the whole test, but also if anyone else has stopped
+      if (!randomInt(NUM_ROUNDS) || stopped > 0) {
+        stopped++;
+        await clone.stop();
+        await new Promise(fin => setTimeout(fin,
+          Math.random() * chaos.timings.startClone));
+        await clone.start();
+        stopped--;
+      }
+      return updateRandomEntityProperty(clone);
     });
   });
 

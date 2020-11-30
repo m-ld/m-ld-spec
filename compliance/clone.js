@@ -124,7 +124,7 @@ async function send(message, params, body) {
     options.body = JSON.stringify(body);
     options.headers = { 'Content-Type': 'application/json' };
   }
-  const res = checkStatus(await fetch(url.toString(), options), url);
+  const res = await checkStatus(await fetch(url.toString(), options), url);
   if (res.headers.get('transfer-encoding') === 'chunked') {
     return res.body.pipe(new Transform({
       objectMode: true,
@@ -141,11 +141,14 @@ async function send(message, params, body) {
   }
 };
 
-function checkStatus(res, url) {
-  if (res.ok) // res.status >= 200 && res.status < 300
+async function checkStatus(res, url) {
+  if (res.ok) { // res.status >= 200 && res.status < 300
     return res;
-  else
-    throw new Error(`${url}: ${res.statusText}`);
+  } else {
+    // Try to get the error message from the body
+    throw new Error(`${url}: ${res.statusText}
+    ${await res.text().catch(() => 'message unavailable')}`);
+  }
 }
 
 function hasPath(obj, path) {
