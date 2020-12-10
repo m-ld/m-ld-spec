@@ -50,5 +50,5 @@ This project uses semantic versioning. There are two main branches.
   A merge into `edge` should be immediately followed by a pre-release if it
   affects versioned components.
 - The `master` branch is for releases. It is delivered to spec.m-ld.org. A merge
-  into `edge` should be immediately followed by a release if it affects
+  into `master` should be immediately followed by a release if it affects
   versioned components.
