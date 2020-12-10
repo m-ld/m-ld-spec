@@ -13,6 +13,7 @@
   ],
   "scripts": {
     "prepublishOnly": "npm run build && npm version $VERSION && git push",
+    "postpublish": "npm dist-tag add \"@m-ld/m-ld-spec@\"${npm_package_version} $(git branch --no-color --show-current)",
     "test": "jasmine --config=compliance/jasmine.json",
     "build": "tsc && typedoc types/index.ts",
     "doc-dev": "onchange \"doc/**/*.*\" \"types/index.ts\" -- npm run build & browser-sync start --server _site --files _site"
