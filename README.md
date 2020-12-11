@@ -7,8 +7,7 @@
 <pre></pre>
 
 # **m-ld** specification
-**m-ld** is a decentralised highly-replicable graph data store with a JSON-based
-API.
+**m-ld** is a decentralised live data sharing component with a JSON-based API.
 
 This repository defines the platform-independent specification for **m-ld**.
 
