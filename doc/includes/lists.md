@@ -2,10 +2,10 @@
 
 ## principles
 1. Internal representation of a `@list` does not need to use [Collections](https://www.w3.org/TR/rdf-schema/#ch_collectionvocab) or [Containers](https://www.w3.org/TR/rdf-schema/#ch_containervocab). Instead it is driven by a sequence CRDT operating on the list items.
-1. A List object is reified to a Subject (unlike in JSON-LD) and has an `@id`, which _can_ be set by the user. This is because it's normal in JSON-LD to be able to create multiple lists for a subject-predicate, but it's necessary to identify the list (not just by its head) when making updates.
+1. A List object is reified to a Subject (unlike in JSON-LD) and has an `@id`, which can be set by the user. This is because it's normal in JSON-LD to be able to create multiple lists for a subject-predicate, but it's necessary to identify the list (not just by its head) when making updates.
 1. A List object behaves logically like a Set of _slots_ `(@id, pos, object)`, where `pos` has its coherence maintained across operations (mapping [Kleppmann](https://martin.kleppmann.com/papers/list-move-papoc20.pdf) to an RDF-representable form).
 1. Slot `pos` is represented as a positive integer in **json-rql**, but can be managed in any way by the list CRDT in play.
-1. Slot `@id` is to identify slots across moves, with the constraint that a slot can only exist once in the list. It _cannot_ be set by the user.
+1. Slot `@id` is to identify slots across moves, with the constraint that a slot can only exist once in the list. It can be set by the user by fully specifying the slot (see below).
 1. Slot `object` is _not_ inferred to be in the object position for the predicate whose object is the list, whether for insert or query.
 1. Translation to/from containers & collections is possible (e.g. recognising well-formed list nodes [(WFLN)](https://www.w3.org/TR/json-ld-api/#serialize-rdf-as-json-ld-algorithm)).
 1. Translation to/from JSON-LD `@list` is as natural as possible.
@@ -35,15 +35,16 @@
   '@id': 's',
   'p': {
     '@id': 'listId',
-    // @type is implicit if 'p': { '@container': '@list' } in context
-    // 'http://m-ld.org/rdflseq' by default, or other
+    // @type 'http://m-ld.org/rdflseq' is added if not specified
     // @list key triggers indexed-object interpretation
     '@list': {
-      // json-rql index uses a data URI
+      // json-rql index uses a data URI or numeric string
       'data:,0': 'foo',
-      // In Javascript index can be a plain number, but not a plain string
-      // ('1' would resolve to a property of the first list item)
-      1: 'bar'
+      // In Javascript index can be a plain number.
+      // Anything else errors.
+      1: 'bar',
+      // Use of the @item keyword means this value is a slot, not a subject item
+      2: { '@id': 'mySlot', '@item': 'baz' }
     }
   }
 }
@@ -143,6 +144,7 @@ Insert into identified list (json-rql):
   }
 }
 ```
+> Append to list requires list length
 
 ## @delete
 All `< s p ?o >` whether `?o` is a list or not:
@@ -162,9 +164,8 @@ Every list and item at `s p`, _including slots_ (but not subject items):
     '@id': 's',
     'p': {
       // '@id': '?' is implicit
-      '@list': '?i'
-      // 🚧 Slot variable is expanded to ?i#index, ?i#slot and ?i#item
-      // == '@list': { '?i#index': '?i' }
+      '@list': { '?index': '?item' }
+      // 🚧 expanded to '@list': { '?index': { '@id': '?item#slot', '@item': '?item' } }
     }
     // if 'p': { '@container': '@list' } in context
     // 'p': '?i'
@@ -178,14 +179,14 @@ Specific value at `s p` _and its slot_:
   '@delete': {
     '@id': '?list',
     '@list': { '?i': 'foo' }
-    // If '?i' is referenced in a non-list-item position, it is ?i#index
+    // If '?i' is referenced in a non-list-item position, it is just plain ?i
   },
   '@where': {
     '@id': 's',
     'p': {
       '@id': '?list',
-      // 🚧 Index variable is expanded to ?i#index and ?i#slot
       '@list': { '?i': 'foo' }
+      // 🚧 expanded to '@list': { '?i': { '@id': '?i#slot', '@item': 'foo } }
     }
   }
 }
@@ -196,15 +197,14 @@ Specific slot by index in a list at `< s p ?list >`:
   '@delete': {
     '@id': '?list',
     '@list': { 5: '?i' }
-    // If '?i' is referenced in a non-list-item position, it is ?i#item
   },
   '@where': {
     '@id': 's',
     'p': {
       '@id': '?list',
       '@list': {
-        // 🚧 Item variable is expanded to ?i#item and ?i#slot
         5: '?i'
+        // 🚧 expanded to 5: { '@id': '?i#slot', '@item': '?i' }
       }
     }
   }
@@ -218,15 +218,14 @@ Move a slot by value (atomically):
   // @delete of start index is implicit because list semantics
   '@insert': {
     '@id': '?list',
-    '@list': { 0: '?i' }
+    '@list': { 0: '?slot' }
   },
   '@where': {
     '@id': 's',
     'p': {
       '@id': '?list',
-      // 🚧 Slot variable is expanded to ?i#item, ?i#index and ?i#slot
-      // TODO: Unfathomable?
-      '@list': { '@id': '?i': '@eq': 'foo' }
+      '@list': { '?': { '@id': '?slot', '@item': 'foo' } }
+      // can omit '@list' key
     }
     // SAME AS
     // '@graph': {
@@ -248,53 +247,37 @@ Move a slot by start index:
     '@id': 's',
     'p': {
       '@id': '?list',
-      // 🚧 Item variable is expanded to ?i#item and ?i#slot
       '@list': { 5: '?i' }
+      // 🚧 expanded to '@list': { 5: { '@id': '?i#slot', '@item': '?i' } }
     }
   }
 }
 ```
 
 ## @describe
-Includes list properties in full (like sets), with `@id`.
+Does not include list property items unless the list itself is described.
 
 ## @construct
 Infer < s p item > (but lose ordering)
 ```js
 {
-  '@construct': { '@id': 's', 'p': '?o' }, // ?o#item
+  '@construct': { '@id': 's', 'p': '?o' },
   '@where': {
     '@id': 's',
-    'p': { '@list': '?o' }
+    'p': { '@list': { '?': '?o' } }
   }
 }
 ```
 
 ## @select
-Select list (and anything else at < s p ?list >):
+Select list reference (and anything else at < s p ?o >):
 ```js
-{
-  '@select': '?list',
-  '@where': { '@id': 's', 'p': '?list' }
-  // if 'p': { '@container': '@list' } in context then must use
-  // '@where': { '@id': 's', 'p': { '@id': '?list', '@list': '?' } }
-}
-```
-==>
-```js
-{
-  '?list': {
-    // Fully identified and indexed
-    '@id': '.well-known/genid/list1',
-    '@type': 'http://m-ld.org/rdflseq',
-    '@list': ['i1', 'i2']
-  }
-}
+{ '@select': '?list', '@where': { '@id': 's', 'p': '?list' } }
 ```
 Select item(s) by index:
 ```js
 {
-  '@select': '?o', // ?o#item
+  '@select': '?o',
   '@where': {
     '@id': 's',
     'p': { '@list': { 5: '?o' } }
