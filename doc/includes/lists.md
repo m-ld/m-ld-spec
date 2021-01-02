@@ -126,12 +126,13 @@ Insert into identified list (JSON-LD):
     '@id': 'listId',
     // This is not an append, which requires explicit index >= length
     // 🚧 @list at top-level is ignored by JSON-LD processor
-    // This inserts at the head of the list (array index is a strong identifier)
+    // This interleaves at the head of the list (array index is a strong identifier)
     '@list': ['foo', 'bar']
   }
 }
 ```
 Insert into identified list (json-rql):
+> Append to list requires list length
 ```js
 {
   '@insert': {
@@ -144,7 +145,50 @@ Insert into identified list (json-rql):
   }
 }
 ```
-> Append to list requires list length
+Insert multiple at one index in identified list:
+```js
+{
+  '@insert': {
+    '@id': 'listId',
+    // This inserts two items at the head of the list
+    // Note indexed list hash does not nest
+    '@list': { 0: ['foo', 'bar'] }
+    // Specify slots with
+    // '@list': { 0: [{ '@item': 'foo' }, { '@item': 'bar' }] }
+    // 🚧 expands internally to '@list': {
+    //   'data:,[0,0]': { '@id': '_:b1', '@item': 'foo' }
+    //   'data:,[0,1]': { '@id': '_:b2', '@item': 'bar' }
+    // }
+    // ⚠️ Deeper nesting is multi-valued @set item
+  }
+}
+```
+Create nested lists:
+> List arrays nest by default, per JSON-LD
+```js
+{
+  '@insert': {
+    '@id': 's',
+    'coordinates': {
+      '@id': 'sc',
+      '@list': [[0, 0], [1, 1]]
+    }
+  }
+}
+```
+Insert new nested list into list:
+> List hashes do not nest
+```js
+{
+  '@insert': {
+    '@id': 's',
+    'coordinates': {
+      '@id': 'sc',
+      '@list': { 0: { '@list': [-1, -1] } }
+    }
+  }
+}
+```
 
 ## @delete
 All `< s p ?o >` whether `?o` is a list or not:
