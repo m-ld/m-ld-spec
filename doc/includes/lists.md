@@ -156,10 +156,10 @@ Insert multiple at one index in identified list:
     // Specify slots with
     // '@list': { 0: [{ '@item': 'foo' }, { '@item': 'bar' }] }
     // 🚧 expands internally to '@list': {
-    //   'data:,[0,0]': { '@id': '_:b1', '@item': 'foo' }
-    //   'data:,[0,1]': { '@id': '_:b2', '@item': 'bar' }
+    //   'data:,0,0': { '@id': '_:b1', '@item': 'foo', 'mld:#index': 0 }
+    //   'data:,0,1': { '@id': '_:b2', '@item': 'bar', 'mld:#index': 0 }
     // }
-    // ⚠️ Deeper nesting is multi-valued @set item
+    // Deeper nesting is nested lists
   }
 }
 ```
@@ -209,7 +209,7 @@ Every list and item at `s p`, _including slots_ (but not subject items):
     'p': {
       // '@id': '?' is implicit
       '@list': { '?index': '?item' }
-      // 🚧 expanded to '@list': { '?index': { '@id': '?item#slot', '@item': '?item' } }
+      // 🚧 expands to '?index#listKey': { '@id': '?index#slot', '@item': '?item', 'mld:#index': '?index' }
     }
     // if 'p': { '@container': '@list' } in context
     // 'p': '?i'
@@ -223,6 +223,7 @@ Specific value at `s p` _and its slot_:
   '@delete': {
     '@id': '?list',
     '@list': { '?i': 'foo' }
+    // 🚧 expands to '?i#listKey': { '@id': '?i#slot', '@item': 'foo', 'mld:#index': '?i' }
     // If '?i' is referenced in a non-list-item position, it is just plain ?i
   },
   '@where': {
@@ -230,7 +231,7 @@ Specific value at `s p` _and its slot_:
     'p': {
       '@id': '?list',
       '@list': { '?i': 'foo' }
-      // 🚧 expanded to '@list': { '?i': { '@id': '?i#slot', '@item': 'foo } }
+      // 🚧 expands to '?i#listKey': { '@id': '?i#slot', '@item': 'foo', 'mld:#index': '?i' }
     }
   }
 }
@@ -246,10 +247,8 @@ Specific slot by index in a list at `< s p ?list >`:
     '@id': 's',
     'p': {
       '@id': '?list',
-      '@list': {
-        5: '?i'
-        // 🚧 expanded to 5: { '@id': '?i#slot', '@item': '?i' }
-      }
+      '@list': { 5: '?i' }
+      // 🚧 expands to '?': { '@id': '?', '@item': '?i', 'mld:#index': 5 }
     }
   }
 }
@@ -262,14 +261,14 @@ Move a slot by value (atomically):
   // @delete of start index is implicit because list semantics
   '@insert': {
     '@id': '?list',
-    '@list': { 0: '?slot' }
+    '@list': { 0: { '@id': '?slot', '@item': 'foo' } }
+     // 🚧 expands to 'data:,0': { '@id': '?slot', '@item': 'foo', 'mld:#index': 0 }
   },
   '@where': {
     '@id': 's',
     'p': {
       '@id': '?list',
       '@list': { '?': { '@id': '?slot', '@item': 'foo' } }
-      // can omit '@list' key
     }
     // SAME AS
     // '@graph': {
@@ -285,14 +284,52 @@ Move a slot by start index:
 {
   '@insert': {
     '@id': '?list',
-    '@list': { 0: '?i' }
+    '@list': { 0: { '@id': '?slot', '@item': '?i' } }
+     // 🚧 expands to 'data:,0': { '@id': '?slot', '@item': '?i', 'mld:#index': 0 }
   },
   '@where': {
     '@id': 's',
     'p': {
       '@id': '?list',
-      '@list': { 5: '?i' }
-      // 🚧 expanded to '@list': { 5: { '@id': '?i#slot', '@item': '?i' } }
+      // Same item could be in two slots, which slot moves? – must be explicit
+      '@list': { 5: { '@id': '?slot', '@item': '?i' } }
+      // 🚧 expands to '?': { '@id': '?slot', '@item': '?i', 'mld:#index': 5 }
+      // listKey, slot & index belong to the index variable because item can appear more than once
+    }
+  }
+}
+```
+Swap slots:
+```js
+{
+  '@insert': {
+    '@id': '?list',
+    '@list': { 0: '?i5', 5: '?i0' }
+  },
+  '@where': {
+    '@id': 's',
+    'p': {
+      '@id': '?list',
+      '@list': { 0: '?i0', 5: '?i5' }
+    }
+  }
+}
+```
+Replace a slot item:
+```js
+{
+  // @delete of foo at ?i is implicit (slot item is single-valued)
+  '@insert': {
+    '@id': '?list',
+    '@list': { '?i': 'bar' }
+     // 🚧 expands to '?i#listKey': { '@id': '?i#slot', '@item': 'bar', 'mld:#index': '?i' }
+  },
+  '@where': {
+    '@id': 's',
+    'p': {
+      '@id': '?list',
+      '@list': { '?i': 'foo' }
+      // 🚧 expands to '?i#listKey': { '@id': '?i#slot', '@item': 'foo', 'mld:#index': '?i' }
     }
   }
 }
@@ -328,6 +365,7 @@ Select item(s) by index:
   }
 }
 ```
+<!-- TODO: Select by index range -->
 <!-- TODO: Length of a list -->
 
 ## app updates
