@@ -258,7 +258,11 @@ Specific slot by index in a list at `< s p ?list >`:
 Move a slot by value (atomically):
 ```js
 {
-  // @delete of start index is implicit because list semantics
+  // @delete of start index is NOT implicit - without it, list constraint rejects
+  '@delete': {
+    '@id': '?list',
+    '@list': { '?i': { '@id': '?slot', '@item': 'foo' } }
+  },
   '@insert': {
     '@id': '?list',
     '@list': { 0: { '@id': '?slot', '@item': 'foo' } }
@@ -268,7 +272,7 @@ Move a slot by value (atomically):
     '@id': 's',
     'p': {
       '@id': '?list',
-      '@list': { '?': { '@id': '?slot', '@item': 'foo' } }
+      '@list': { '?i': { '@id': '?slot', '@item': 'foo' } }
     }
     // SAME AS
     // '@graph': {
@@ -318,7 +322,9 @@ Swap slots:
 Replace a slot item:
 ```js
 {
-  // @delete of foo at ?i is implicit (slot item is single-valued)
+  '@delete': {
+    '@id': '?list', '@list': { '?i': 'foo' }
+  },
   '@insert': {
     '@id': '?list',
     '@list': { '?i': 'bar' }
