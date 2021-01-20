@@ -20,7 +20,8 @@ describe('Active colony', () => {
       return update;
     })));
     await Promise.all(clones.map(async (clone, i) => {
-      expect(updates[i]).toEqual(updates[originator]);
+      expect(updates[i]['@delete']).toEqual(updates[originator]['@delete']);
+      expect(updates[i]['@insert']).toEqual(updates[originator]['@insert']);
       expect(await clone.transact({ '@describe': 'fred' }))
         .toEqual([{ '@id': 'fred', name: 'Fred' }]);
     }));
