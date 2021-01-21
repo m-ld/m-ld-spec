@@ -286,6 +286,11 @@ Move a slot by value (atomically):
 Move a slot by start index:
 ```js
 {
+  '@delete': {
+    '@id': '?list',
+    '@list': { 5: { '@id': '?slot', '@item': '?i' } }
+    // 🚧 expands to '?': { '@id': '?slot', '@item': '?i', 'mld:#index': 5 }
+  },
   '@insert': {
     '@id': '?list',
     '@list': { 0: { '@id': '?slot', '@item': '?i' } }

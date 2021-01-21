@@ -69,6 +69,36 @@ describe('Default list handling', () => {
     }]);
   });
 
+  it('transacts parallel list moves from two clones', async () => {
+    clones = Clone.create(2);
+    await clones[0].start(true);
+    await clones[1].start();
+
+    await Promise.all([
+      clones[0].transact({ '@id': 'shopping', '@list': ['Bread', 'Milk', 'Spam'] }),
+      clones[1].updated('shopping')
+    ]);
+    await Promise.all([
+      clones[0].transact({
+        '@delete': { '@id': 'shopping', '@list': { 1: { '@id': '?slot', '@item': 'Milk' } } },
+        '@insert': { '@id': 'shopping', '@list': { 0: { '@id': '?slot', '@item': 'Milk' } } },
+        '@where': { '@id': 'shopping', '@list': { 1: { '@id': '?slot', '@item': 'Milk' } } }
+      }),
+      clones[1].transact({
+        '@delete': { '@id': 'shopping', '@list': { 1: { '@id': '?slot', '@item': 'Milk' } } },
+        '@insert': { '@id': 'shopping', '@list': { 0: { '@id': '?slot', '@item': 'Milk' } } },
+        '@where': { '@id': 'shopping', '@list': { 1: { '@id': '?slot', '@item': 'Milk' } } }
+      }),
+      clones[0].updated('Milk')
+    ]);
+    // 'Milk' is not duplicated in the final list, and both intents are preserved
+    expect(await clones[0].transact({ '@describe': 'shopping' })).toEqual([{
+      '@id': 'shopping',
+      '@type': 'http://m-ld.org/RdfLseq',
+      '@list': ['Milk', 'Bread', 'Spam']
+    }]);
+  });
+
   afterEach(async () => {
     await Promise.all(clones.map(clone => clone.destroy()));
   });
