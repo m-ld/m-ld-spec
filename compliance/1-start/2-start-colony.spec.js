@@ -17,14 +17,14 @@ describe('Colony', () => {
   });
 
   it('clone can restart', async () => {
-    await clone1.start();
+    await clone1.start(true);
     await clone2.start();
     await clone1.stop();
     await expectAsync(clone1.start()).toBeResolved();
   });
 
   it('clone can restart alone', async () => {
-    await clone1.start();
+    await clone1.start(true);
     await clone2.start();
     await clone1.stop();
     await clone2.stop();

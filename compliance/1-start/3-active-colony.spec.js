@@ -8,7 +8,7 @@ describe('Active colony', () => {
 
   beforeEach(async () => {
     clones = Array.from(new Array(3), () => new Clone);
-    await clones[0].start(); // Genesis
+    await clones[0].start(true); // Genesis
     await Promise.all(clones.slice(1).map(clone => clone.start()));
   });
 

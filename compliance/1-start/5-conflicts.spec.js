@@ -7,7 +7,7 @@ describe('On conflict', () => {
   let clone1 = new Clone, clone2 = new Clone
 
   beforeEach(async () => {
-    await clone1.start();
+    await clone1.start(true);
     await clone2.start();
   });
 
