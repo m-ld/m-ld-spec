@@ -81,13 +81,11 @@ describe('Default list handling', () => {
     await Promise.all([
       clones[0].transact({
         '@delete': { '@id': 'shopping', '@list': { 1: { '@id': '?slot', '@item': 'Milk' } } },
-        '@insert': { '@id': 'shopping', '@list': { 0: { '@id': '?slot', '@item': 'Milk' } } },
-        '@where': { '@id': 'shopping', '@list': { 1: { '@id': '?slot', '@item': 'Milk' } } }
+        '@insert': { '@id': 'shopping', '@list': { 0: { '@id': '?slot', '@item': 'Milk' } } }
       }),
       clones[1].transact({
         '@delete': { '@id': 'shopping', '@list': { 1: { '@id': '?slot', '@item': 'Milk' } } },
-        '@insert': { '@id': 'shopping', '@list': { 0: { '@id': '?slot', '@item': 'Milk' } } },
-        '@where': { '@id': 'shopping', '@list': { 1: { '@id': '?slot', '@item': 'Milk' } } }
+        '@insert': { '@id': 'shopping', '@list': { 0: { '@id': '?slot', '@item': 'Milk' } } }
       }),
       clones[0].updated('Milk')
     ]);
