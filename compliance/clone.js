@@ -20,18 +20,32 @@ module.exports = class Clone extends EventEmitter {
   }
 
   /**
+   * Creates the requested number of clones, with the given configuration.
+   * @param {number} count number of clones
+   * @param {MeldConfig} config configuration for all clones
+   */
+  static create(count, config) {
+    return Array(count).fill().map(() => new Clone(config));
+  }
+
+  /**
    * Starts a clone. The domain is inferred from the running test name.
    * The 'start' end-point sets up an HTTP Stream. The first chunk is the 'started' message;
    * all subsequent chunks are 'updated' messages, which are emitted by this class as events.
    * http://orchestrator:port/start?cloneId=hexclonid&domain=full-test-name.m-ld.org
-   * <= config: { constraint: { '@type'... } }
-   * => { '@type': 'started' }, { '@type: 'updated', body: DeleteInsert }...
+   * <= config: { constraints: [{ '@type'... }] }
+   * => { '@type': 'started' },
+   *    { '@type: 'status', body: MeldStatus },
+   *    { '@type: 'updated', body: DeleteInsert }...
+   * @param {boolean} requireOnline if `true`, wait for the clone to have status online
    */
-  async start() {
+  async start(requireOnline) {
     const events = await send('start', { cloneId: this.id, domain }, this.config);
     return new Promise((resolve, reject) => {
       events.on('data', event => {
-        if (event['@type'] === 'started')
+        if (requireOnline && event['@type'] === 'status' && event.body.online)
+          resolve(event);
+        else if (!requireOnline && event['@type'] === 'started')
           resolve(event);
         this.emit(event['@type'], event.body);
       });
@@ -97,14 +111,28 @@ module.exports = class Clone extends EventEmitter {
   };
 
   /**
-   * Utility returning a promise that resolves when an update is emitted with the given path.
-   * The path matching requires the last path element to be a deep value which has the prior
-   * path elements appearing, in order, in its deep path.
-   * @param  {...any} path any sparse path that the update must contain
+   * Utility returning a promise that resolves when an update is emitted with
+   * the given path. The path matching requires the last path element to be a
+   * deep value which has the prior path elements appearing, in order, in its
+   * deep path.
+   * @param {...any} path any sparse path that the update must contain
    */
   async updated(...path) {
     return new Promise(resolve => this.on('updated',
       update => hasPath(update, path) && resolve(update)));
+  }
+
+  /**
+   * Utility returning a promise that resolves when the given status value has
+   * been emitted by the clone.
+   * @param {'online' | 'outdated' | silo} status 
+   * @param {boolean} value
+   */
+  async status(status, value) {
+    return new Promise(resolve => this.on('status', newStatus => {
+      if (newStatus != null && newStatus[status] === value)
+        resolve();
+    }));
   }
 
   /**

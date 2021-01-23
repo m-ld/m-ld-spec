@@ -44,7 +44,7 @@ exports.ChaosTest = class {
   }
 
   async setup() {
-    await this.clones[0].start(); // Genesis
+    await this.clones[0].start(true); // Genesis
 
     let start = process.uptime();
     await Promise.all(this.clones.slice(1).map(clone => clone.start()));

@@ -12,7 +12,7 @@ describe('On partition', () => {
   });
 
   it('still accepts transactions', async () => {
-    await clone1.start();
+    await clone1.start(true);
     await clone1.partition();
     await Promise.all([
       clone1.transact({ '@id': 'fred', name: 'Fred' }),
@@ -22,7 +22,7 @@ describe('On partition', () => {
 
   it('converges after partition', async () => {
     clone2 = new Clone;
-    await clone1.start();
+    await clone1.start(true);
     await clone2.start();
     await Promise.all([
       clone1.transact({ '@id': 'fred', name: 'Fred' }),
@@ -43,7 +43,7 @@ describe('On partition', () => {
 
   it('converges after partition and close', async () => {
     clone2 = new Clone;
-    await clone1.start();
+    await clone1.start(true);
     await clone2.start();
     await Promise.all([
       clone1.transact({ '@id': 'fred', name: 'Fred' }),
@@ -61,7 +61,7 @@ describe('On partition', () => {
     ]);
     await clone1.partition(false);
     await Promise.all([
-      clone1.start(),
+      clone1.start(true),
       clone2.start(),
       expectAsync(clone1.updated('@id', 'bambam')).toBeResolved(),
       expectAsync(clone2.updated('@id', 'wilma')).toBeResolved()
@@ -71,7 +71,7 @@ describe('On partition', () => {
   it('converges after partition from colony', async () => {
     clone2 = new Clone;
     clone3 = new Clone;
-    await clone1.start();
+    await clone1.start(true);
     await clone2.start();
     await clone3.start();
     await Promise.all([
