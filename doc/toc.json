@@ -26,10 +26,6 @@
     ]
   },
   {
-    "url": "#concurrency",
-    "title": "Concurrency"
-  },
-  {
     "url": "#data-semantics",
     "title": "Data Semantics",
     "children": [
