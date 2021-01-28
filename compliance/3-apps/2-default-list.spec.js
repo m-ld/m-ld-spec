@@ -79,22 +79,38 @@ describe('Default list handling', () => {
       clones[1].updated('shopping')
     ]);
     await Promise.all([
+      // Add another item which we can use to check for updates
       clones[0].transact({
         '@delete': { '@id': 'shopping', '@list': { 1: { '@id': '?slot', '@item': 'Milk' } } },
-        '@insert': { '@id': 'shopping', '@list': { 0: { '@id': '?slot', '@item': 'Milk' } } }
+        '@insert': {
+          '@id': 'shopping',
+          '@list': {
+            0: { '@id': '?slot', '@item': 'Milk' },
+            3: 'Angel Delight'
+          }
+        }
       }),
       clones[1].transact({
         '@delete': { '@id': 'shopping', '@list': { 1: { '@id': '?slot', '@item': 'Milk' } } },
-        '@insert': { '@id': 'shopping', '@list': { 0: { '@id': '?slot', '@item': 'Milk' } } }
+        '@insert': {
+          '@id': 'shopping',
+          '@list': {
+            0: { '@id': '?slot', '@item': 'Milk' },
+            3: 'Pink Wafers'
+          }
+        }
       }),
-      clones[0].updated('Milk')
+      clones[0].updated('Pink Wafers'),
+      clones[1].updated('Angel Delight')
     ]);
+    const lists = (await Promise.all(
+      clones.map(clone => clone.transact({ '@describe': 'shopping' }))))
+      .map(shoppings => shoppings[0]['@list']);
+    
     // 'Milk' is not duplicated in the final list, and both intents are preserved
-    expect(await clones[0].transact({ '@describe': 'shopping' })).toEqual([{
-      '@id': 'shopping',
-      '@type': 'http://m-ld.org/RdfLseq',
-      '@list': ['Milk', 'Bread', 'Spam']
-    }]);
+    expect(lists[0]).toEqual(lists[1]);
+    expect(lists[0].slice(0, 3)).toEqual(['Milk', 'Bread', 'Spam']);
+    expect(new Set(lists[0].slice(3))).toEqual(new Set(['Pink Wafers', 'Angel Delight']));
   });
 
   afterEach(async () => {
