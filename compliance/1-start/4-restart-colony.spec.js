@@ -9,7 +9,7 @@ describe('Restart colony', () => {
   beforeEach(async () => {
     // Create two clones for free, with genesis started
     clones = [new Clone, new Clone];
-    await clones[0].start();
+    await clones[0].start(true);
   });
 
   it('new clone starts with snapshot', async () => {

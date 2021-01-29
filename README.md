@@ -7,7 +7,8 @@
 <pre></pre>
 
 # **m-ld** specification
-**m-ld** is a decentralised live data sharing component with a JSON-based API.
+**m-ld** is a decentralised live information sharing component with a JSON-based
+API.
 
 This repository defines the platform-independent specification for **m-ld**.
 
@@ -49,5 +50,5 @@ This project uses semantic versioning. There are two main branches.
   A merge into `edge` should be immediately followed by a pre-release if it
   affects versioned components.
 - The `master` branch is for releases. It is delivered to spec.m-ld.org. A merge
-  into `edge` should be immediately followed by a release if it affects
+  into `master` should be immediately followed by a release if it affects
   versioned components.

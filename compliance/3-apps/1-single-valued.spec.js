@@ -7,10 +7,9 @@ describe('Single-valued property', () => {
   let clones;
 
   it('resolves two values', async () => {
-    clones = Array(2).fill().map(() => new Clone(
-      { constraint: { '@type': 'single-valued', property: 'name' } }));
-    await clones[0].start();
-    await clones[1].start();
+    clones = await Clone.start(2, {
+      constraints: [{ '@type': 'single-valued', property: 'name' }]
+    });
 
     await Promise.all([
       clones[0].transact({ '@id': 'fred', name: 'Fred' }),
@@ -28,11 +27,9 @@ describe('Single-valued property', () => {
   });
 
   it('resolves n values', async () => {
-    clones = Array(5).fill().map(() => new Clone(
-      { constraint: { '@type': 'single-valued', property: 'name' } }));
-    await clones[0].start();
-    await Promise.all(
-      clones.slice(1).map(clone => clone.start()));
+    clones = await Clone.start(5, {
+      constraints: [{ '@type': 'single-valued', property: 'name' }]
+    });
 
     const outcomes = await Promise.all(clones.map((clone, i) =>
       // Every clone inserts its own name
@@ -61,21 +58,18 @@ describe('Single-valued property', () => {
   });
 
   it('applies constraints on rev-up', async () => {
-    clones = Array(3).fill().map(() => new Clone(
-      { constraint: { '@type': 'single-valued', property: 'name' } }));
-    await clones[0].start();
-    await clones[1].start();
-    await clones[2].start();
+    clones = await Clone.start(3, {
+      constraints: [{ '@type': 'single-valued', property: 'name' }]
+    });
 
     await Promise.all([
       clones[0].transact({ '@id': 'wilma', name: 'Wilma' }),
-      clones[0].updated('@insert', 'Wilma'),
-      clones[1].updated('@insert', 'Wilma'),
-      clones[2].updated('@insert', 'Wilma')
+      ...clones.map(clone => clone.updated('@insert', 'Wilma'))
     ]);
 
     await clones[2].stop();
 
+    // Transact conflicting values and await resolution
     await Promise.all([
       clones[0].transact({ '@id': 'fred', name: 'Fred' }),
       clones[1].transact({ '@id': 'fred', name: 'Flintstone' }),
@@ -83,18 +77,31 @@ describe('Single-valued property', () => {
       clones[1].updated({ '@delete': 'Flintstone', '@insert': 'Fred' })
     ]);
 
-    // Not expecting to see any constraint-resolution from the startup of
-    // clone[2], due to suppression of a no-op
-    clones[0].on('updated', update => fail(update));
+    // Now change our minds unilaterally
+    await Promise.all([
+      clones[0].transact({
+        '@delete': { '@id': 'fred', name: 'Fred' },
+        '@insert': { '@id': 'fred', name: 'Flintstone' }
+      }),
+      clones[1].updated({ '@delete': 'Fred', '@insert': 'Flintstone' })
+    ]);
+
+    // We expect the clones[2] rev-up to do its own resolution, prior to
+    // receiving the changed mind, but it should not change anyone's state
+    clones[0].updated('@delete', 'Flintstone').then(fail);
 
     await Promise.all([
       clones[2].start(),
-      // We might see insert 'Flintstone' as well, depends on ordering
-      clones[2].updated('@insert', 'Fred')
+      clones[2].updated('@insert', 'Fred'),
+      clones[2].updated({ '@delete': 'Fred', '@insert': 'Flintstone' })
     ]);
 
-    const subjects = await clones[2].transact({ '@describe': 'fred' });
-    expect(subjects[0].name).toBe('Fred');
+    const subjects = await Promise.all(clones.map(async clone =>
+      (await clone.transact({ '@describe': 'fred' }))[0]));
+    
+    expect(subjects[0].name).toBe('Flintstone');
+    expect(subjects[1]).toEqual(subjects[0]);
+    expect(subjects[2]).toEqual(subjects[0]);
   });
 
   afterEach(async () => {

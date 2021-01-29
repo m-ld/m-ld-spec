@@ -26,12 +26,22 @@
     ]
   },
   {
-    "url": "#concurrency",
-    "title": "Concurrency"
-  },
-  {
     "url": "#data-semantics",
-    "title": "Data Semantics"
+    "title": "Data Semantics",
+    "children": [
+      {
+        "url": "#subjects",
+        "title": "Subjects"
+      },
+      {
+        "url": "#constraints",
+        "title": "Constraints"
+      },
+      {
+        "url": "#lists",
+        "title": "Lists"
+      }
+    ]
   },
   {
     "url": "#clone-protocol",
