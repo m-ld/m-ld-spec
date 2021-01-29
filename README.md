@@ -7,7 +7,7 @@
 <pre></pre>
 
 # **m-ld** specification
-**m-ld** is a decentralised live knowledge sharing component with a JSON-based
+**m-ld** is a decentralised live information sharing component with a JSON-based
 API.
 
 This repository defines the platform-independent specification for **m-ld**.
