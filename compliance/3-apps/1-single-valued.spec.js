@@ -7,9 +7,9 @@ describe('Single-valued property', () => {
   let clones;
 
   it('resolves two values', async () => {
-    clones = Clone.create(2, { constraints: [{ '@type': 'single-valued', property: 'name' }] });
-    await clones[0].start();
-    await clones[1].start();
+    clones = await Clone.start(2, {
+      constraints: [{ '@type': 'single-valued', property: 'name' }]
+    });
 
     await Promise.all([
       clones[0].transact({ '@id': 'fred', name: 'Fred' }),
@@ -27,10 +27,9 @@ describe('Single-valued property', () => {
   });
 
   it('resolves n values', async () => {
-    clones = Clone.create(5, { constraints: [{ '@type': 'single-valued', property: 'name' }] });
-    await clones[0].start();
-    await Promise.all(
-      clones.slice(1).map(clone => clone.start()));
+    clones = await Clone.start(5, {
+      constraints: [{ '@type': 'single-valued', property: 'name' }]
+    });
 
     const outcomes = await Promise.all(clones.map((clone, i) =>
       // Every clone inserts its own name
@@ -59,10 +58,9 @@ describe('Single-valued property', () => {
   });
 
   it('applies constraints on rev-up', async () => {
-    clones = Clone.create(3, { constraints: [{ '@type': 'single-valued', property: 'name' }] });
-    await clones[0].start();
-    await clones[1].start();
-    await clones[2].start();
+    clones = await Clone.start(3, {
+      constraints: [{ '@type': 'single-valued', property: 'name' }]
+    });
 
     await Promise.all([
       clones[0].transact({ '@id': 'wilma', name: 'Wilma' }),

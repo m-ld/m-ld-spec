@@ -20,12 +20,27 @@ module.exports = class Clone extends EventEmitter {
   }
 
   /**
-   * Creates the requested number of clones, with the given configuration.
+   * Creates the requested number of clones, with the given configuration. The
+   * returned clones are not started.
    * @param {number} count number of clones
    * @param {MeldConfig} config configuration for all clones
    */
   static create(count, config) {
     return Array(count).fill().map(() => new Clone(config));
+  }
+
+  /**
+   * Creates and starts the requested number of clones, with the given
+   * configuration. If you want to start a subset of the clones, call
+   * {@link create} instead and start them yourself.
+   * @param {number} count number of clones
+   * @param {MeldConfig} config configuration for all clones
+   */
+  static async start(count, config) {
+    const clones = Clone.create(count, config);
+    await clones[0].start(true);
+    await Promise.all(clones.slice(1).map(clone => clone.start()));
+    return clones;
   }
 
   /**
