@@ -126,7 +126,7 @@ export interface MeldStatus {
   silo: boolean;
   /**
    * Current local clock ticks at the time of the status change. This can be
-   * used in a subsequent call to {@link MeldStore.follow}, to ensure no updates
+   * used in a subsequent call to {@link MeldClone.follow}, to ensure no updates
    * are missed.
    *
    * This clock is *strictly* local, and there is no relationship between the

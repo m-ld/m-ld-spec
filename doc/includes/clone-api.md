@@ -152,7 +152,7 @@ variable:
 }
 ```
 > 🚧 *Further documentation and examples coming soon.* Please
-> [get in touch](mailto:info@m-ld.io) to tell us about your use-case!
+> [get in touch](https://m-ld.org/hello/) to tell us about your use-case!
 
 ### Events
 Whenever data changes in a clone, an update event is notified to "followers" who
