@@ -1,6 +1,6 @@
 {
   "name": "@m-ld/m-ld-spec",
-  "version": "0.6.1",
+  "version": "0.6.2-0",
   "description": "m-ld Protocol Specification",
   "directories": {
     "test": "test"
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/m-ld/m-ld-spec#readme",
   "dependencies": {
     "jasmine": "^3.6.4",
-    "json-rql": "^0.6.0",
+    "json-rql": "^0.6.1",
     "node-fetch": "^2.6.1",
     "rxjs": "^6.6.3"
   },

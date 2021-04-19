@@ -89,7 +89,7 @@ engine initialisation.
 > 🚧 Inclusion of declarative integrity constraints in **m-ld** is an
 > experimental feature, and the subject of active research. The available
 > constraints and the means by which they are declared for a domain is likely to
-> change. Please do [get in touch](mailto:info@m-ld.io) with your requirements.
+> change. Please do [get in touch](https://m-ld.org/hello/) with your requirements.
 
 Declarative constraints have two modes of operation:
 1. They are *checked* during a local write transaction. If the update violates
