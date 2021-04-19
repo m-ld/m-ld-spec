@@ -1,6 +1,6 @@
 {
   "name": "@m-ld/m-ld-spec",
-  "version": "0.6.2-0",
+  "version": "0.6.2",
   "description": "m-ld Protocol Specification",
   "directories": {
     "test": "test"
