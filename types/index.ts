@@ -1,4 +1,4 @@
-import { Subject, Read, Group, Update } from 'json-rql';
+import { Group, Read, Subject, Update } from 'json-rql';
 import { Observable } from 'rxjs';
 
 /**
@@ -104,7 +104,7 @@ export interface LiveStatus {
    * to `undefined` when the clone closes.
    */
   becomes: (match?: Partial<MeldStatus>) => Promise<MeldStatus | undefined>;
-};
+}
 
 export interface MeldStatus {
   /**
