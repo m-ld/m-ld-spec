@@ -1,4 +1,4 @@
-const { ChaosTest, randomInt, updateRandomEntityProperty } = require('./chaos');
+const { sleep, ChaosTest, randomInt, updateRandomEntityProperty } = require('./chaos');
 
 /**
  * Chaotic convergence with stopping (no killing)
@@ -8,8 +8,7 @@ describe('Stopping chaos', () => {
   let chaos;
 
   beforeEach(async () => {
-    chaos = new ChaosTest(NUM_CLONES, NUM_ROUNDS);
-    await chaos.setup();
+    chaos = await new ChaosTest(NUM_CLONES, NUM_ROUNDS).setup();
     // Make a round mostly longer than a transaction but sometimes shorter
     chaos.meanRoundDurationMillis = chaos.timings.transact * 1.5;
   });
@@ -21,7 +20,7 @@ describe('Stopping chaos', () => {
       if (!randomInt(8) && stopped < NUM_CLONES - 1) {
         stopped++;
         await clone.stop();
-        await new Promise(fin => setTimeout(fin, chaos.timings.startClone));
+        await sleep(Math.random() * chaos.timings.startClone);
         await clone.start();
         stopped--;
       }
@@ -36,8 +35,7 @@ describe('Stopping chaos', () => {
       if (!randomInt(NUM_ROUNDS) || stopped > 0) {
         stopped++;
         await clone.stop();
-        await new Promise(fin => setTimeout(fin,
-          Math.random() * chaos.timings.startClone));
+        await sleep(Math.random() * chaos.timings.startClone);
         await clone.start();
         stopped--;
       }

@@ -1,4 +1,4 @@
-const { ChaosTest, randomInt, updateRandomEntityProperty } = require('./chaos');
+const { ChaosTest, sleep, randomInt, updateRandomEntityProperty } = require('./chaos');
 
 /**
  * Chaotic convergence of three clones with one being killed
@@ -20,11 +20,11 @@ describe('Killing chaos', () => {
       if (!randomInt(5)) {
         if (cloneNo === NUM_CLONES - 1) {
           await clone.kill();
-          await new Promise(fin => setTimeout(fin, chaos.timings.startClone));
+          await sleep(chaos.timings.startClone);
           await clone.start();
         } else {
           // Need to slow down the other clones to roughly the same degree
-          await new Promise(fin => setTimeout(fin, chaos.timings.startClone * 2));
+          await sleep(chaos.timings.startClone * 2);
         }
       }
       return updateRandomEntityProperty(clone);
