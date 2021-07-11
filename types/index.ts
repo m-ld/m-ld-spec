@@ -1,5 +1,5 @@
-import { Group, Read, Subject, Update } from 'json-rql';
-import { Observable } from 'rxjs';
+import type { Group, Read, Subject, Update } from 'json-rql';
+import type { Observable } from 'rxjs';
 
 /**
  * A **m-ld** clone represents domain data to an app. This is the abstract
@@ -142,6 +142,7 @@ export interface MeldStatus {
  * error codes where appropriate. The means by which errors are signalled is
  * platform-specific.
  */
+// noinspection JSUnusedGlobalSymbols
 export enum MeldErrorStatus {
   /**
    * No error has occurred.
