@@ -2,6 +2,11 @@ const fetch = require('node-fetch');
 const EventEmitter = require('events');
 const { Transform } = require('stream');
 
+/**
+ * @typedef { import("../types").MeldConfig } MeldConfig
+ * @typedef { import("../types").MeldUpdate } MeldUpdate
+ */
+
 let domain;
 jasmine.getEnv().addReporter({
   specStarted: (result) =>
@@ -9,13 +14,21 @@ jasmine.getEnv().addReporter({
 });
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 
+const ids = new Set;
+function newId() {
+  let id;
+  // noinspection StatementWithEmptyBodyJS
+  while (ids.has(id = Math.floor(Math.random() * 0xFFFFFFFF).toString(16)));
+  ids.add(id);
+  return id;
+}
 /**
  * A clone object wraps the orchestrator API for a single clone.
  */
 module.exports = class Clone extends EventEmitter {
   constructor(config) {
     super();
-    this.id = Math.floor(Math.random() * 0xFFFFFFFF).toString(16);
+    this.id = newId();
     this.config = config;
   }
 
@@ -51,10 +64,10 @@ module.exports = class Clone extends EventEmitter {
    * <= config: { constraints: [{ '@type'... }] }
    * => { '@type': 'started' },
    *    { '@type: 'status', body: MeldStatus },
-   *    { '@type: 'updated', body: DeleteInsert }...
+   *    { '@type: 'updated', body: MeldUpdate }...
    * @param {boolean} requireOnline if `true`, wait for the clone to have status online
    */
-  async start(requireOnline) {
+  async start(requireOnline = false) {
     const events = await send('start', { cloneId: this.id, domain }, this.config);
     return new Promise((resolve, reject) => {
       events.on('data', event => {
@@ -131,6 +144,7 @@ module.exports = class Clone extends EventEmitter {
    * deep value which has the prior path elements appearing, in order, in its
    * deep path.
    * @param {...any} path any sparse path that the update must contain
+   * @returns {Promise<MeldUpdate>} the update
    */
   async updated(...path) {
     return new Promise(resolve => this.on('updated',
@@ -182,7 +196,7 @@ async function send(message, params, body) {
   } else {
     return res.json();
   }
-};
+}
 
 async function checkStatus(res, url) {
   if (res.ok) { // res.status >= 200 && res.status < 300
