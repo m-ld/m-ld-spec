@@ -41,7 +41,7 @@ describe('Stopping chaos', () => {
       }
       return updateRandomEntityProperty(clone);
     });
-  });
+  }, jasmine.DEFAULT_TIMEOUT_INTERVAL * 2);
 
   afterEach(async () => chaos.tearDown());
 });
