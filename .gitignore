@@ -5,3 +5,4 @@ node_modules
 types/index.js
 types/index.d.ts
 _site/
+/tsconfig.tsbuildinfo
