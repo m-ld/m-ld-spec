@@ -62,7 +62,7 @@ export interface MeldClone {
    * continuous, terminating when the clone closes (and can therefore be used to
    * detect closure).
    */
-  readonly status: Observable<MeldStatus> & LiveStatus;
+  readonly status: LiveStatus;
 }
 
 /**
@@ -92,7 +92,7 @@ export interface MeldUpdate {
 /**
  * A means to obtain the current status, and await future statuses, of a clone.
  */
-export interface LiveStatus {
+export interface LiveStatus extends Observable<MeldStatus> {
   /**
    * The current clone status
    */
@@ -179,16 +179,12 @@ export enum MeldErrorStatus {
   'Unknown error' = 5000,
   /**
    * The engine has received an update that it cannot parse. This may be due to
-   * a version inconsistency, or a bad actor. As this error could lead to data
-   * loss, the clone will immediately close, persisting its current state if
-   * possible.
+   * a version inconsistency, or a bad actor.
    */
   'Bad update' = 5001,
   /**
    * The engine has received a response that it cannot parse. This may be due
-   * to a version inconsistency, or a bad actor. As this error could lead to
-   * data loss, the clone will immediately close, persisting its current state
-   * if possible.
+   * to a version inconsistency, or a bad actor.
    */
   'Bad response' = 5002,
   /**

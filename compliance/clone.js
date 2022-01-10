@@ -30,6 +30,7 @@ module.exports = class Clone extends EventEmitter {
     super();
     this.id = newId();
     this.config = config;
+    this.domain = domain;
   }
 
   /**
@@ -154,7 +155,7 @@ module.exports = class Clone extends EventEmitter {
   /**
    * Utility returning a promise that resolves when the given status value has
    * been emitted by the clone.
-   * @param {'online' | 'outdated' | silo} status 
+   * @param {'online' | 'outdated' | silo} status
    * @param {boolean} value
    */
   async status(status, value) {
@@ -203,8 +204,10 @@ async function checkStatus(res, url) {
     return res;
   } else {
     // Try to get the error message from the body
-    throw new Error(`${url}: ${res.statusText}
-    ${await res.text().catch(() => 'message unavailable')}`);
+    throw await res.json()
+      .then(err => new Error(err.message))
+      .catch(() => res.text())
+      .catch(() => `message unavailable, ${res.statusText} for ${url}`);
   }
 }
 

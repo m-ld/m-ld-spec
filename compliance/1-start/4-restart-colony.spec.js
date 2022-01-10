@@ -146,7 +146,7 @@ describe('Restart colony', () => {
   });
 
   afterEach(async () => {
-    for (clone of clones)
+    for (let clone of clones)
       await clone.destroy();
   });
 });
