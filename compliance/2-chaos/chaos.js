@@ -117,6 +117,7 @@ class ChaosTest {
     // Start other clones if directed
     if (start)
       await Promise.all(this.clones.slice(1).map(clone => clone.start()));
+    debugLog('Setup timings', this.timings);
     return this;
   }
 
