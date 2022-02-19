@@ -48,6 +48,6 @@ describe('Active colony', () => {
     }
   });
 
-  afterEach(async () => await Promise.all(clones.map(clone => clone.destroy())));
+  afterEach(() => Promise.all(clones.map(clone => clone.destroy())));
 });
 

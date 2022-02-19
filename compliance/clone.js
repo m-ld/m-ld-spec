@@ -37,10 +37,10 @@ module.exports = class Clone extends EventEmitter {
    * Creates the requested number of clones, with the given configuration. The
    * returned clones are not started.
    * @param {number} count number of clones
-   * @param {MeldConfig} config configuration for all clones
+   * @param {MeldConfig} [config] configuration for all clones
    */
   static create(count, config) {
-    return Array(count).fill().map(() => new Clone(config));
+    return Array(count).fill(undefined).map(() => new Clone(config));
   }
 
   /**

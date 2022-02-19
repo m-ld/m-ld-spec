@@ -163,7 +163,15 @@ export enum MeldErrorStatus {
   'Delta too big' = 4002,
 
   //////////////////////////////////////////////////////////////////////////////
-  // Not found errors
+  // Unauthorised error
+  /**
+   * A request was made for data for which the current security principal does
+   * not have access rights.
+   */
+  'Unauthorised' = 4030,
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Not found error
   /**
    * A request was made for updates in the too-distant past. This can occur when
    * following clone updates, or when re-starting a clone that has been offline
