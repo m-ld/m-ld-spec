@@ -37,7 +37,7 @@ describe('Single-valued property', () => {
         // All but the last clone sees their name squashed
         async () => {
           if (i < 4)
-            await clone.updated('@delete', 'Fred' + i);
+            await clone.updated('@insert', 'Fred4');
           return 'squashed';
         },
         // OR they got someone else's name first and failed. This should be rare
