@@ -48,7 +48,7 @@ module.exports = class Clone extends EventEmitter {
    * configuration. If you want to start a subset of the clones, call
    * {@link create} instead and start them yourself.
    * @param {number} count number of clones
-   * @param {MeldConfig} config configuration for all clones
+   * @param {MeldConfig} [config] configuration for all clones
    */
   static async start(count, config) {
     const clones = Clone.create(count, config);
@@ -184,6 +184,7 @@ async function send(message, params, body) {
   }
   const res = await checkStatus(await fetch(url.toString(), options), url);
   if (res.headers.get('transfer-encoding') === 'chunked') {
+    // noinspection JSUnusedGlobalSymbols
     return res.body.pipe(new Transform({
       objectMode: true,
       transform(chunk, _, callback) {
