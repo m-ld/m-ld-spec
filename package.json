@@ -12,8 +12,6 @@
     "types/*"
   ],
   "scripts": {
-    "prepublishOnly": "npm run build && npm version $VERSION && git push",
-    "postpublish": "npm dist-tag add \"@m-ld/m-ld-spec@\"${npm_package_version} $(git branch --no-color --show-current)",
     "test": "jasmine --config=compliance/jasmine.json",
     "build": "tsc && typedoc types/index.ts",
     "doc-dev": "onchange \"doc/**/*.*\" \"types/index.ts\" -- npm run build & browser-sync start --server _site --files _site"
@@ -32,12 +30,13 @@
   },
   "homepage": "https://github.com/m-ld/m-ld-spec#readme",
   "dependencies": {
-    "jasmine": "^3.6.4",
+    "jasmine": "^4.4.0",
     "json-rql": "^0.6.2",
-    "node-fetch": "^2.6.6",
+    "node-fetch": "^2.6.7",
     "rxjs": "^7.2.0"
   },
   "devDependencies": {
+    "@m-ld/io-js-build": "^0.1.1",
     "@m-ld/typedoc-theme": "^0.1.4",
     "browser-sync": "^2.26.13",
     "onchange": "^7.1.0",
