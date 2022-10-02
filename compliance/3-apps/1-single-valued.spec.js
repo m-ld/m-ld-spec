@@ -31,22 +31,23 @@ describe('Single-valued property', () => {
       constraints: [{ '@type': 'single-valued', property: 'name' }]
     });
 
-    const outcomes = await Promise.all(clones.map((clone, i) =>
-      // Every clone inserts its own name
-      clone.transact({ '@id': 'fred', name: 'Fred' + i }).then(
+    const outcomes = await Promise.all(clones.map(async (clone, i) =>
+      Promise.race([
+        // Every clone inserts its own name
+        clone.transact({ '@id': 'fred', name: 'Fred' + i })
+          .then(() => new Promise((_r) => {})) // Expecting to be squashed
+          .catch(err => {
+            // The clone got someone else's name first and failed. This should
+            // be rare, it requires the clone to be very slow to accept the txn.
+            if (!`${err}`.includes('Multiple values'))
+              throw err;
+            console.log(`Clone ${i} rejected`);
+            return 'rejected';
+          }),
         // All but the last clone sees their name squashed
-        async () => {
-          if (i < 4)
-            await clone.updated('@delete', 'Fred' + i);
-          return 'squashed';
-        },
-        // OR they got someone else's name first and failed. This should be rare
-        // because it requires the clone to be very slow to accept the txn.
-        err => {
-          if (!`${err}`.includes('Multiple values'))
-            throw err;
-          return 'rejected';
-        })));
+        (i < 4 ? clone.updated('@insert', 'Fred4') : Promise.resolve())
+          .then(() => 'squashed')
+      ])));
     if (!outcomes.includes('squashed'))
       fail('Invalid test: all clones rejected the conflict');
 
@@ -54,7 +55,7 @@ describe('Single-valued property', () => {
       clones.map(clone => clone.transact({ '@describe': 'fred' })));
     expect(subjectses[0].length).toBe(1);
     expect(subjectses[0][0].name).toBe('Fred4');
-    subjectses.forEach(subjects => expect(subjects).toEqual(subjectses[0]))
+    subjectses.forEach(subjects => expect(subjects).toEqual(subjectses[0]));
   });
 
   it('applies constraints on rev-up', async () => {
@@ -98,7 +99,7 @@ describe('Single-valued property', () => {
 
     const subjects = await Promise.all(clones.map(async clone =>
       (await clone.transact({ '@describe': 'fred' }))[0]));
-    
+
     expect(subjects[0].name).toBe('Flintstone');
     expect(subjects[1]).toEqual(subjects[0]);
     expect(subjects[2]).toEqual(subjects[0]);

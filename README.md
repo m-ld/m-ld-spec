@@ -1,10 +1,21 @@
 <pre></pre>
+<!--suppress HtmlDeprecatedAttribute -->
 <p align="center">
   <a href="https://m-ld.org/">
-    <img alt="m-ld" src="https://m-ld.org/m-ld.svg" width="300em" />
+    <picture>
+      <!--suppress HtmlUnknownTarget -->
+      <source media="(prefers-color-scheme: light)" srcset="https://m-ld.org/m-ld.svg"/>
+      <!--suppress HtmlUnknownTarget -->
+<source media="(prefers-color-scheme: dark)" srcset="https://m-ld.org/m-ld.inverse.svg"/>
+      <img alt="m-ld" src="https://m-ld.org/m-ld.svg" width="300em" />
+    </picture>
   </a>
 </p>
 <pre></pre>
+
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Gitter](https://img.shields.io/gitter/room/m-ld/community)](https://gitter.im/m-ld/community)
+[![GitHub Discussions](https://img.shields.io/github/discussions/m-ld/m-ld-spec)](https://github.com/m-ld/m-ld-spec/discussions)
 
 # **m-ld** specification
 **m-ld** is a decentralised live information sharing component with a JSON-based
@@ -52,3 +63,9 @@ This project uses semantic versioning. There are two main branches.
 - The `master` branch is for releases. It is delivered to spec.m-ld.org. A merge
   into `master` should be immediately followed by a release if it affects
   versioned components.
+
+`npx publish.sh ≪newversion≫` (from
+[m-ld-io-js-build](https://github.com/m-ld/m-ld-io-js-build)) builds the
+project, increments the version as specified (e.g. `patch`), pushes the code and
+publishes the package. *Ensure the repo is up-to-date and on* master *(release)
+or* edge *(pre-release)*.
