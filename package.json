@@ -41,7 +41,7 @@
     "@m-ld/typedoc-theme": "^0.1.4",
     "browser-sync": "^2.26.13",
     "onchange": "^7.1.0",
-    "typedoc": "^0.19.2",
+    "typedoc": "^0.23.15",
     "typescript": "^4.1.3"
   }
 }
