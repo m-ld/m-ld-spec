@@ -137,12 +137,12 @@ export interface MeldStatus {
   ticks: number;
 }
 
+// noinspection JSUnusedGlobalSymbols
 /**
  * Errors that occur in a **m-ld** engine should be signalled with the given
  * error codes where appropriate. The means by which errors are signalled is
  * platform-specific.
  */
-// noinspection JSUnusedGlobalSymbols
 export enum MeldErrorStatus {
   /**
    * No error has occurred.

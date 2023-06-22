@@ -26,7 +26,8 @@ describe('Genesis clone', () => {
     expect(update).toEqual({
       '@ticks': 1,
       '@delete': [],
-      '@insert': [{ '@id': 'fred', name: 'Fred' }]
+      '@insert': [{ '@id': 'fred', name: 'Fred' }],
+      '@update': []
     });
   });
 
