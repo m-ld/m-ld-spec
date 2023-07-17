@@ -130,8 +130,10 @@ describe('Default list handling', () => {
     ]);
     // Conclude
     await Promise.all([
-      clones[0].transact({ '@id': 'shopping', 'done': 'done' }),
-      ...clones.slice(1).map(clone => clone.updated('done'))
+      ...clones.map(clone => [
+        clone.transact({ '@id': 'shopping', 'done': clone.id }),
+        ...clones.filter(c => c !== clone).map(c => c.updated(clone.id))
+      ]).flat()
     ]);
     const lists = (await Promise.all(
       clones.map(clone => clone.transact({ '@describe': 'shopping' }))))
