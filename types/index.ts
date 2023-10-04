@@ -1,4 +1,4 @@
-import type { Group, Read, Subject, Update } from 'json-rql';
+import type { Context, Group, Read, Subject, Update } from 'json-rql';
 import type { Observable } from 'rxjs';
 
 /**
@@ -138,11 +138,48 @@ export interface MeldStatus {
 }
 
 /**
+ * **m-ld** clone configuration, used to initialise a {@link MeldClone} for use.
+ * The use of this interface is optional, since clone initialisation is part of
+ * an engine's application API.
+ */
+export interface MeldConfig {
+    /**
+   * The local identity of the m-ld clone session, used for message bus identity
+   * and logging. This identity does not need to be the same across re-starts of
+   * a clone with persistent data. It must be unique among the clones for the
+   * domain.
+   */
+  '@id': string;
+  /**
+   * A URI domain name, which defines the universal identity of the dataset
+   * being manipulated by a set of clones (for example, on the configured
+   * message bus). For a clone with persistent data from a prior session, this
+   * *must* be the same as the previous session.
+   */
+  '@domain': string;
+  /**
+   * Set to `true` to indicate that this clone will be 'genesis'; that is, the
+   * first new clone on a new domain. This flag will be ignored if the clone is
+   * not new. If `false`, and this clone is new, successful clone initialisation
+   * is dependent on the availability of another clone. If set to true, and
+   * subsequently another non-new clone appears on the same domain, either or
+   * both clones will immediately close to preserve their data integrity.
+   */
+  genesis: boolean;
+  /**
+   * An optional JSON-LD context for the domain data. If not specified:
+   * * `@base` defaults to `http://{domain}`
+   * * `@vocab` defaults to the resolution of `/#` against the base
+   */
+  '@context'?: Context;
+}
+
+// noinspection JSUnusedGlobalSymbols
+/**
  * Errors that occur in a **m-ld** engine should be signalled with the given
  * error codes where appropriate. The means by which errors are signalled is
  * platform-specific.
  */
-// noinspection JSUnusedGlobalSymbols
 export enum MeldErrorStatus {
   /**
    * No error has occurred.
